@@ -1,0 +1,8 @@
+/* Original questionnaire fonts, served locally for reliable PDF embedding. */
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/Golos-Text-400.ttf') format('truetype')}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/Golos-Text-500.ttf') format('truetype')}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/Golos-Text-600.ttf') format('truetype')}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/Golos-Text-700.ttf') format('truetype')}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/Cormorant-Garamond-500.ttf') format('truetype')}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/Cormorant-Garamond-600.ttf') format('truetype')}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/Cormorant-Garamond-700.ttf') format('truetype')}

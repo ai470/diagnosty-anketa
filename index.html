@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Карта-диагностика финансового пути</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+<title>Диагностическая карта финансового пути</title>
+<link href="assets/fonts.css" rel="stylesheet">
 <style>
   :root{
     --pine:#10382C; --pine-2:#1C4A3A; --pine-3:#0B2A20;
@@ -64,16 +62,8 @@
     border-bottom:2px solid var(--gold);
   }
   .hero-inner{max-width:1180px; margin:0 auto}
-  .hero .eyebrow{color:var(--gold-2); font-size:13px; letter-spacing:2px; text-transform:uppercase; font-weight:600}
-  .hero h1{font-size:44px; line-height:1.02; margin:8px 0 20px; max-width:16ch}
-  .journey{display:flex; align-items:stretch; gap:0; flex-wrap:wrap}
-  .pt{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.28); border-radius:12px;
-    padding:14px 18px; flex:1 1 300px; min-width:0}
-  .pt .lbl{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-2); font-weight:600}
-  .pt .val{font-family:"Cormorant Garamond",serif; font-size:22px; line-height:1.15; margin-top:4px; color:#F6F3E9; min-height:1.2em}
-  .pt .val.empty{color:#7E9285; font-style:italic; font-size:17px}
-  .arrow{display:grid; place-items:center; padding:0 16px; color:var(--gold); font-size:26px; flex:none}
-  @media(max-width:720px){ .hero h1{font-size:32px} .arrow{transform:rotate(90deg); padding:6px} }
+  .hero h1{font-size:44px; line-height:1.02; margin:0; max-width:28ch}
+  @media(max-width:720px){ .hero h1{font-size:32px} }
 
   /* ---------- Layout ---------- */
   .wrap{max-width:1180px; margin:0 auto; padding:26px 22px 80px; display:grid;
@@ -91,7 +81,6 @@
     display:grid; place-items:center; font-family:"Cormorant Garamond",serif; font-weight:700; font-size:14px; flex:none; color:var(--muted)}
   .rail a.active .num{border-color:var(--gold); color:var(--pine); background:var(--gold-soft)}
   .rail .num.done{background:var(--pine); border-color:var(--pine); color:var(--gold-2)}
-  .rail-tip{margin-top:16px; padding:12px 13px; background:var(--sage); border-radius:10px; font-size:12px; color:var(--muted); line-height:1.45}
 
   /* ---------- Sections ---------- */
   section.card{background:#fff; border:1px solid var(--line); border-radius:var(--radius);
@@ -100,7 +89,6 @@
     padding-bottom:14px; border-bottom:1px solid var(--line)}
   .sec-head .idx{font-family:"Cormorant Garamond",serif; font-size:34px; font-weight:700; color:var(--gold); line-height:1}
   .sec-head h2{font-size:22px; font-weight:600}
-  .sec-head p{margin:2px 0 0; color:var(--muted); font-size:13px}
 
   .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px 22px}
   .grid.one{grid-template-columns:1fr}
@@ -136,14 +124,12 @@
 
   .auto{background:var(--sage); border:1px dashed var(--gold); color:var(--pine-2); padding:10px 12px;
     border-radius:10px; font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:10px}
-  .auto small{font-weight:500; color:var(--muted); font-size:11px}
 
   /* ---------- Calculator ---------- */
   .calc{margin-top:6px; border:1px solid var(--gold); border-radius:var(--radius); overflow:hidden}
   .calc-head{background:linear-gradient(120deg,var(--pine),var(--pine-2)); color:#F1EEE2; padding:16px 20px;
     display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
   .calc-head h3{font-family:"Cormorant Garamond",serif; font-size:23px; font-weight:600}
-  .calc-head small{color:#BFCcc0; font-size:12px}
   .calc-body{padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:22px}
   @media(max-width:760px){ .calc-body{grid-template-columns:1fr} }
   .calc-inputs{display:grid; gap:13px}
@@ -180,8 +166,6 @@
   .route .check{position:absolute; top:12px; right:12px; width:22px; height:22px; border-radius:50%;
     background:var(--gold); color:#fff; display:none; place-items:center; font-size:13px}
   .route.on .check{display:grid}
-  .suggest{font-size:12.5px; color:var(--muted); margin:0 0 14px}
-  .suggest b{color:var(--pine-2)}
 
   /* ---------- Summary ---------- */
   .summary{background:linear-gradient(135deg,var(--pine),var(--pine-2)); color:#F1EEE2; border-radius:var(--radius); padding:26px 28px}
@@ -229,54 +213,18 @@
   .foot-legal p{max-width:1180px; margin:0 auto; padding:16px 22px 26px; color:#7E9285; font-size:11.5px; line-height:1.55; text-align:center}
   @media(max-width:640px){ .foot-inner{flex-direction:column; align-items:flex-start} }
 
-  /* ---------- Print ---------- */
   .print-only{display:none}
-  @media print{
-    @page{margin:14mm}
-    body{background:#fff; font-size:12px}
-    .topbar,.rail,.rail-tip,.overlay,.no-print,.calc-inputs .pillset{display:none !important}
-    .hero{padding:0 0 14px; background:#fff; color:var(--ink); border-bottom:2px solid var(--gold)}
-    .hero .eyebrow{color:var(--gold)}
-    .hero h1{color:var(--ink); font-size:30px}
-    .pt{background:#fafafa; border-color:var(--line)}
-    .pt .lbl{color:#8a6d24}
-    .pt .val{color:var(--ink)}
-    .wrap{display:block; max-width:none; padding:0}
-    section.card{box-shadow:none; border-color:#ccc; break-inside:avoid; page-break-inside:avoid; margin-bottom:12px}
-    .summary,.calc-head,.result,.site-footer{-webkit-print-color-adjust:exact; print-color-adjust:exact}
-    .site-footer{margin-top:14px; break-inside:avoid}
-    .print-only{display:block}
-  }
-
-  /* ---------- Force-print (used for PDF export via html2pdf) ---------- */
-  .force-print body{background:#fff}
-  .force-print .topbar,.force-print .rail,.force-print .rail-tip,.force-print .overlay,.force-print .no-print,.force-print .calc-inputs .pillset{display:none !important}
-  .force-print .hero{padding:0 0 14px; background:#fff; color:var(--ink); border-bottom:2px solid var(--gold)}
-  .force-print .hero .eyebrow{color:var(--gold)}
-  .force-print .hero h1{color:var(--ink); font-size:30px}
-  .force-print .pt{background:#fafafa; border-color:var(--line)}
-  .force-print .pt .lbl{color:#8a6d24}
-  .force-print .pt .val{color:var(--ink)}
-  .force-print .wrap{display:block; max-width:none; padding:0}
-  .force-print section.card{box-shadow:none; border-color:#ccc; margin-bottom:12px; break-inside:avoid; page-break-inside:avoid}
-  .force-print .summary{break-inside:avoid; page-break-inside:avoid}
-  .force-print .site-footer{margin-top:14px; break-inside:avoid; page-break-inside:avoid}
-  .force-print .print-only{display:block}
-  .force-print textarea{height:auto !important; overflow:visible !important; white-space:pre-wrap}
-  .force-print [data-f]{display:none !important}
-  .pdf-value{display:none}
-  .force-print .pdf-value{display:block; white-space:pre-wrap; padding:9px 11px; border:1px solid var(--line);
-    border-radius:10px; background:#FBFBF6; min-height:1.3em; font-size:14px; color:var(--ink)}
 </style>
+<link href="assets/print.css" rel="stylesheet">
 </head>
 <body>
 
 <!-- ===== TOP BAR ===== -->
 <div class="topbar no-print">
   <div class="brand">
-    <div class="crest"><span>К</span></div>
+    <div class="crest"><span>М</span></div>
     <div>
-      <b>Капитал нового уровня</b>
+      <b>Монтериум</b>
       <small>Отдел диагностик · карта финансового пути</small>
     </div>
   </div>
@@ -288,31 +236,14 @@
   <div class="top-actions">
     <span id="save-status" style="font-size:12px; color:#C7D3C9; margin-right:2px"></span>
     <button class="btn btn-line" onclick="saveAnketa()">💾 Сохранить анкету</button>
-    <button class="btn btn-gold" id="pdf-btn" onclick="downloadPDF()">⤓ Скачать PDF</button>
+    <button class="btn btn-gold" id="pdf-btn" onclick="downloadPDF()" title="Откроется окно печати — выберите «Сохранить как PDF»">⤓ Скачать PDF</button>
   </div>
 </div>
 
 <!-- ===== HERO ===== -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Карта-диагностика</div>
-    <h1 class="serif">Финансовый путь клиента</h1>
-    <div class="journey">
-      <div class="pt">
-        <div class="lbl">Точка А · где сейчас</div>
-        <div class="val empty" id="hero-a">заполняется на созвоне</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="pt">
-        <div class="lbl">Точка Б · цель через 3–5 лет</div>
-        <div class="val empty" id="hero-b">заполняется на созвоне</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="pt" style="border-color:var(--gold)">
-        <div class="lbl">Маршрут</div>
-        <div class="val empty" id="hero-route">выберите в блоке 6</div>
-      </div>
-    </div>
+    <h1 class="serif">Диагностическая карта финансового пути</h1>
   </div>
 </div>
 
@@ -327,13 +258,12 @@
       <li><a href="#s5"><span class="num" data-n="5">5</span> Главный барьер</a></li>
       <li><a href="#s6"><span class="num" data-n="6">6</span> Резюме встречи</a></li>
     </ol>
-    <div class="rail-tip">Заполняйте карту вместе с клиентом, демонстрируя экран. По итогу — «Скачать PDF» и отправка в Битрикс.</div>
   </nav>
 
   <main>
     <!-- SECTION 1 -->
     <section class="card" id="s1">
-      <div class="sec-head"><span class="idx serif">1</span><div><h2>Знакомство</h2><p>Кто перед нами и что привело на диагностику</p></div></div>
+      <div class="sec-head"><span class="idx serif">1</span><div><h2>Знакомство</h2></div></div>
       <div class="grid">
         <div class="field"><label>Имя и фамилия</label><input type="text" data-f="name" placeholder="Например, Анна Смирнова"></div>
         <div class="field"><label>Дата диагностики</label><input type="date" data-f="date"></div>
@@ -346,37 +276,38 @@
 
     <!-- SECTION 2 -->
     <section class="card" id="s2">
-      <div class="sec-head"><span class="idx serif">2</span><div><h2>Финансовая ситуация</h2><p>Доходы, расходы, запас прочности</p></div></div>
+      <div class="sec-head"><span class="idx serif">2</span><div><h2>Финансовая ситуация</h2></div></div>
       <div class="grid">
         <div class="field"><label>Средний доход семьи, ₽/мес</label><input type="number" data-f="income" placeholder="150000"></div>
         <div class="field"><label>Средние расходы семьи, ₽/мес</label><input type="number" data-f="expense" placeholder="170000"></div>
         <div class="field span2"><label>Свободный остаток после расходов</label>
-          <div class="auto"><span id="free-rest">— ₽</span><small>считается автоматически: доход − расходы</small></div>
+          <div class="auto"><span id="free-rest">— ₽</span></div>
         </div>
         <div class="field"><label>Финансовая подушка?</label><div class="pillset" data-toggle="cushion"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
         <div class="field"><label>Кредиты и обязательства?</label><div class="pillset neg" data-toggle="loans"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
         <div class="field"><label>Накопления в инвест-инструментах?</label><div class="pillset" data-toggle="hasInvest"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
-        <div class="field"><label>Где храните накопления? <span class="hint">банки / фондовый / крипта / недвижимость</span></label><input type="text" data-f="storeWhere" placeholder="На вкладе"></div>
+        <div class="field"><label>Где храните накопления? <span class="hint">банки, фондовый рынок, криптовалюта, недвижимость</span></label><input type="text" data-f="storeWhere" placeholder="На вкладе"></div>
       </div>
     </section>
 
     <!-- SECTION 3 -->
     <section class="card" id="s3">
-      <div class="sec-head"><span class="idx serif">3</span><div><h2>Цели и мотивация</h2><p>Куда идём и что для этого уже делается</p></div></div>
+      <div class="sec-head"><span class="idx serif">3</span><div><h2>Цели и мотивация</h2></div></div>
       <div class="grid">
         <div class="field span2"><label>Главная финансовая цель сейчас</label><input type="text" data-f="goal" placeholder="Например, на обучение ребёнка"></div>
         <div class="field"><label>Стоимость цели, ₽</label><input type="number" data-f="goalSum" placeholder="3000000"></div>
-        <div class="field"><label>Срок цели, лет</label><input type="number" data-f="years" placeholder="3"></div>
+        <div class="field"><label>Срок цели, лет</label><input type="number" data-f="years" placeholder="3" min="1" max="20" step="1"></div>
         <div class="field"><label>Уже начали копить?</label><div class="pillset" data-toggle="started"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
         <div class="field"><label>Сумма на старте, ₽ <span class="hint">уже накоплено / для старта</span></label><input type="number" data-f="start" placeholder="5000"></div>
         <div class="field"><label>Готовы откладывать, ₽/мес</label><input type="number" data-f="monthly" placeholder="1000"></div>
-        <div class="field"><label>Ожидаемая доходность, %/год <span class="hint">для расчёта</span></label><input type="number" data-f="rate" placeholder="30"></div>
+        <div class="field span2"><label for="goal-progress">При текущей ситуации цель достигается на</label><div class="auto"><output id="goal-progress" aria-live="polite">—</output></div></div>
+        <div class="field span2"><label for="goal-future">Накопится сумма при текущей стратегии</label><div class="auto"><output id="goal-future" aria-live="polite">— ₽</output></div></div>
       </div>
 
       <!-- CALCULATOR -->
       <div class="calc" style="margin-top:22px">
         <div class="calc-head">
-          <div><h3 class="serif">Проверка стратегии — сложный процент</h3><small>Показываем клиенту разрыв между «как сейчас» и «как нужно»</small></div>
+          <div><h3 class="serif">Проверка стратегии</h3></div>
         </div>
         <div class="calc-body">
           <div class="calc-inputs">
@@ -391,7 +322,7 @@
                 <circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="14"/>
                 <circle id="gauge-arc" cx="75" cy="75" r="64" fill="none" stroke="var(--gold)" stroke-width="14" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
               </svg>
-              <div class="pct"><div><b id="g-pct">0%</b><small>цели</small></div></div>
+              <div class="pct"><div><b id="g-pct">—</b><small>цели</small></div></div>
             </div>
             <div>
               <div class="res-row"><span class="k">Накопится при текущей стратегии</span><span class="v" id="r-fv">— ₽</span></div>
@@ -405,7 +336,7 @@
 
     <!-- SECTION 4 -->
     <section class="card" id="s4">
-      <div class="sec-head"><span class="idx serif">4</span><div><h2>Опыт инвестирования</h2><p>С чем клиент уже работал и что хочет освоить</p></div></div>
+      <div class="sec-head"><span class="idx serif">4</span><div><h2>Опыт инвестирования</h2></div></div>
       <label style="font-size:13px; font-weight:600; display:block; margin-bottom:10px">Есть ли у вас что-то из перечисленного:</label>
       <div class="tiles" id="exp-tiles">
         <label class="tile"><input type="checkbox" data-exp="Крипторынок"><span>Крипторынок</span></label>
@@ -425,7 +356,7 @@
 
     <!-- SECTION 5 -->
     <section class="card" id="s5">
-      <div class="sec-head"><span class="idx serif">5</span><div><h2>Главный барьер</h2><p>Что мешает и цена бездействия</p></div></div>
+      <div class="sec-head"><span class="idx serif">5</span><div><h2>Главный барьер</h2></div></div>
       <div class="grid one">
         <div class="field"><label>Что сейчас мешает достигать финансовую цель?</label><textarea data-f="barrier" placeholder="Ключевое препятствие"></textarea></div>
         <div class="field"><label>Что будет, если продолжите откладывать цель?</label><textarea data-f="ifDelay" placeholder="Последствия бездействия"></textarea></div>
@@ -434,14 +365,13 @@
 
     <!-- SECTION 6 -->
     <section class="card" id="s6">
-      <div class="sec-head"><span class="idx serif">6</span><div><h2>Резюме встречи</h2><p>Точка А → Точка Б → рекомендуемый маршрут</p></div></div>
-      <p class="suggest" id="route-suggest">Подсказка появится, когда заполните блок «Опыт инвестирования».</p>
+      <div class="sec-head"><span class="idx serif">6</span><div><h2>Резюме встречи</h2></div></div>
       <div class="routes" id="routes"></div>
     </section>
 
     <!-- SUMMARY -->
     <section class="summary" id="summary-block">
-      <h2 class="serif">Ваш маршрут к капиталу нового уровня</h2>
+      <h2 class="serif">Ваш финансовый маршрут</h2>
       <div class="sum-grid">
         <div class="sum-card"><div class="lbl">Точка А — где сейчас</div><div class="txt empty" id="sum-a">—</div></div>
         <div class="sum-card"><div class="lbl">Точка Б — цель</div><div class="txt empty" id="sum-b">—</div></div>
@@ -456,7 +386,7 @@
     <section class="card no-print" style="text-align:center; padding:30px 28px">
       <p style="margin:0 0 14px; color:var(--muted); font-size:14px">Анкета заполнена? Сохраните её в общую таблицу.</p>
       <button class="btn btn-gold" style="padding:12px 26px; font-size:14.5px" onclick="saveAnketa()">💾 Сохранить анкету</button>
-      <button class="btn btn-line" style="padding:12px 26px; font-size:14.5px; margin-left:10px" onclick="downloadPDF()">⤓ Скачать PDF</button>
+      <button class="btn btn-line" style="padding:12px 26px; font-size:14.5px; margin-left:10px" onclick="downloadPDF()" title="Откроется окно печати — выберите «Сохранить как PDF»">⤓ Скачать PDF</button>
       <div id="save-status-bottom" style="margin-top:12px; font-size:12.5px; color:var(--muted)"></div>
     </section>
   </main>
@@ -466,10 +396,10 @@
 <footer class="site-footer">
   <div class="foot-inner">
     <div class="foot-expert">
-      <div class="crest"><span>К</span></div>
+      <div class="crest"><span>М</span></div>
       <div>
         <b>Татьяна Волкова</b>
-        <small>Эксперт по инвестициям · программа «Капитал нового уровня»</small>
+        <small>Эксперт по инвестициям · Монтериум</small>
       </div>
     </div>
     <nav class="socials" aria-label="Социальные сети">
@@ -509,12 +439,16 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<div id="pdf-status" class="pdf-status no-print" role="status" aria-live="polite"></div>
+<script src="assets/pdf-export.js"></script>
+<script src="assets/strategy.js"></script>
 <script>
 /* ---------------- state ---------------- */
 const S = {};
 const fmt = n => isFinite(n) ? new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n)) : '—';
 const rub = n => fmt(n)+' ₽';
+const money = n => new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)+' ₽';
+const percent = n => new Intl.NumberFormat('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n*100)+'%';
 
 /* text/number/date/textarea binding */
 document.querySelectorAll('[data-f]').forEach(el=>{
@@ -536,7 +470,7 @@ document.querySelectorAll('[data-exp]').forEach(cb=>{
   cb.addEventListener('change',()=>{
     cb.closest('.tile').classList.toggle('on',cb.checked);
     S.experience = [...document.querySelectorAll('[data-exp]:checked')].map(x=>x.dataset.exp);
-    suggestRoute(); recompute();
+    recompute();
   });
 });
 
@@ -556,17 +490,6 @@ ROUTES.forEach(r=>{
   routesEl.appendChild(d);
 });
 
-/* soft auto-suggestion from interests/experience */
-function suggestRoute(){
-  const t=((S.interest||'')+' '+(S.improve||'')+' '+(S.goal||'')).toLowerCase();
-  let hint='Финансовая основа';
-  if(/недвиж|метр|кварт|объект/.test(t)) hint='Недвижимость';
-  else if(/облиг|акци|фонд|портфел|биржа/.test(t)) hint='Фондовый рынок';
-  else if(/крипт|битк|цифров/.test(t)) hint='Криптовалюта';
-  else if(/торг|аукцион|банкрот/.test(t)) hint='Торги';
-  document.getElementById('route-suggest').innerHTML =
-    `Авто-подсказка по ответам клиента: <b>${hint}</b>. Финальный маршрут выбирает эксперт — нажмите на карточку.`;
-}
 
 /* ---------------- compute ---------------- */
 function recompute(){
@@ -575,8 +498,7 @@ function recompute(){
   document.getElementById('m-date').textContent = S.date? new Date(S.date).toLocaleDateString('ru-RU'):'—';
   document.getElementById('m-expert').textContent = S.expert||'—';
 
-  // hero + summary A/B
-  setText('hero-a', S.pointA); setText('hero-b', S.pointB);
+  // summary A/B
   setText('sum-a', S.pointA); setText('sum-b', S.pointB);
 
   // free rest
@@ -587,28 +509,21 @@ function recompute(){
   fr.style.color = rest<0? 'var(--rust)':'var(--pine-2)';
 
   // calculator
-  const goal=+S.goalSum||0, years=+S.years||0, start=+S.start||0, pmt=+S.monthly||0, rate=(+S.rate||0)/100;
+  const goal=+S.goalSum||0, years=+S.years||0, start=+S.start||0, pmt=+S.monthly||0;
+  const forecast=AnketaStrategy.calculate({goal:S.goalSum, years:S.years, start:S.start, monthly:S.monthly});
   document.getElementById('c-goal').textContent = goal? rub(goal):'— ₽';
   document.getElementById('c-term').textContent = years? years+' лет':'— лет';
   document.getElementById('c-inputs').textContent = (start||pmt)? rub(start)+' + '+fmt(pmt)+'/мес':'—';
 
-  const months=Math.round(years*12), r=rate/12;
-  let fv=null;
-  if(months>0){
-    if(r>0){ const g=Math.pow(1+r,months); fv=start*g + pmt*((g-1)/r); }
-    else fv=start+pmt*months;
-  }
   const arc=document.getElementById('gauge-arc'), C=402;
-  if(fv!==null && goal>0){
-    const pct=fv/goal;
-    document.getElementById('r-fv').textContent=rub(fv);
-    document.getElementById('g-pct').textContent=(pct*100<10? (pct*100).toFixed(1):Math.round(pct*100))+'%';
-    const gap=Math.max(goal-fv,0);
-    document.getElementById('r-gap').textContent=rub(gap);
-    // required monthly to reach goal
-    let need=0;
-    if(months>0){ if(r>0){const g=Math.pow(1+r,months); need=(goal-start*g)/((g-1)/r);} else need=(goal-start)/months; }
-    document.getElementById('r-need').textContent=rub(Math.max(need,0));
+  if(forecast){
+    const {fv,pct,gap,need}=forecast;
+    document.getElementById('goal-future').textContent=money(fv);
+    document.getElementById('goal-progress').textContent=percent(pct);
+    document.getElementById('r-fv').textContent=money(fv);
+    document.getElementById('g-pct').textContent=percent(pct);
+    document.getElementById('r-gap').textContent=money(gap);
+    document.getElementById('r-need').textContent=money(need);
     arc.style.strokeDashoffset = C*(1-Math.min(pct,1));
     // nudge
     const nd=document.getElementById('nudge');
@@ -617,24 +532,31 @@ function recompute(){
     else { nd.style.background='var(--rust-soft)'; nd.style.borderColor='var(--rust)'; nd.style.color='#7A3421';
       nd.innerHTML=`При текущей стратегии цель закрывается лишь на <b>${(pct*100).toFixed(1)}%</b>. Чтобы достичь её за срок, нужно откладывать около <b>${rub(Math.max(need,0))}/мес</b> — против нынешних ${fmt(pmt)}/мес.`; }
     // print line
-    document.getElementById('print-fv').textContent=rub(fv);
-    document.getElementById('print-pct').textContent=(pct*100).toFixed(1)+'%';
-    document.getElementById('print-need').textContent=rub(Math.max(need,0));
+    document.getElementById('print-fv').textContent=money(fv);
+    document.getElementById('print-pct').textContent=percent(pct);
+    document.getElementById('print-need').textContent=money(need);
   } else {
-    ['r-fv','r-gap','r-need'].forEach(id=>document.getElementById(id).textContent='— ₽');
-    document.getElementById('g-pct').textContent='0%'; arc.style.strokeDashoffset=C;
+    ['r-fv','r-gap','r-need','goal-future'].forEach(id=>document.getElementById(id).textContent='— ₽');
+    document.getElementById('goal-progress').textContent='—';
+    document.getElementById('g-pct').textContent='—'; arc.style.strokeDashoffset=C;
+    ['print-fv','print-pct','print-need'].forEach(id=>document.getElementById(id).textContent='—');
+    const nd=document.getElementById('nudge');
+    nd.removeAttribute('style');
+    nd.textContent='Заполните поля выше — покажем, достигается ли цель при текущей стратегии.';
   }
 
   // route mirrors
   if(S.route){
-    setText('hero-route', S.route.name);
     setText('sum-route', S.route.name+' · курс «'+S.route.course+'»');
+  } else {
+    setText('sum-route', '');
   }
 }
 function setText(id,val){
   const el=document.getElementById(id); if(!el) return;
+  if(!el.dataset.emptyText) el.dataset.emptyText=el.textContent;
   if(val && String(val).trim()){ el.textContent=val; el.classList.remove('empty'); }
-  else { el.classList.add('empty'); }
+  else { el.textContent=el.dataset.emptyText; el.classList.add('empty'); }
 }
 
 /* ---------------- rail scroll-spy ---------------- */
@@ -659,7 +581,7 @@ function openBitrix(){
     ['UF_CRM_FREE_REST', document.getElementById('free-rest').textContent],
     ['UF_CRM_GOAL_PCT', document.getElementById('g-pct').textContent],
     ['UF_CRM_ROUTE', S.route? (S.route.name+' / '+S.route.course):'—'],
-    ['FILE', 'Карта-диагностика.pdf'],
+    ['FILE', 'Диагностическая карта финансового пути.pdf'],
   ];
   kv.innerHTML=rows.map(([k,v])=>`<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
   document.getElementById('bitrix-status').innerHTML='● Готово к отправке';
@@ -680,7 +602,7 @@ function fillDemo(){
     reason:'Хочу разобраться с деньгами',pointA:'Есть кредиты и долги, доход меньше расходов',
     pointB:'Есть капитал и уверенность в завтрашнем дне',income:150000,expense:170000,
     storeWhere:'На вкладе',goal:'На обучение ребёнка через 4 года',goalSum:3000000,years:3,
-    start:5000,monthly:1000,rate:30,expLevel:'Почти ничего не знаю, результата нет',
+    start:5000,monthly:1000,expLevel:'Почти ничего не знаю, результата нет',
     improve:'Повысить доходность',interest:'Облигации, фондовый рынок',
     barrier:'Не хватает свободных денег и системы',ifDelay:'Цель отодвинется ещё на годы'};
   Object.entries(data).forEach(([k,v])=>{
@@ -691,7 +613,7 @@ function fillDemo(){
     const cb=document.querySelector(`[data-exp="${x}"]`); if(cb){cb.checked=true; cb.closest('.tile').classList.add('on');}
   });
   S.experience=['Крипторынок','Банковские продукты'];
-  suggestRoute(); recompute();
+  recompute();
   // preselect stock route as example
   const rc=document.querySelector('.route[data-id="stock"]'); if(rc)rc.click();
 }
@@ -703,50 +625,16 @@ function setPill(name,val){
 recompute();
 
 /* ---------------- PDF export ---------------- */
-function preparePrintClone(doc){
-  doc.documentElement.classList.add('force-print');
-  // input/textarea values live in the .value property, not as DOM text —
-  // html2canvas can only paint real DOM text, so swap fields for plain text blocks
-  doc.querySelectorAll('[data-f]').forEach(el=>{
-    if(el.tagName!=='INPUT' && el.tagName!=='TEXTAREA') return;
-    let val = el.value || '';
-    if(el.type==='date' && val){
-      const d = new Date(val);
-      if(!isNaN(d)) val = d.toLocaleDateString('ru-RU');
-    }
-    const div = doc.createElement('div');
-    div.className = 'pdf-value';
-    div.textContent = val && String(val).trim() ? val : '—';
-    el.parentNode.insertBefore(div, el.nextSibling);
+function syncAnketaForPrint(){
+  document.querySelectorAll('[data-f]').forEach(el=>{ S[el.dataset.f]=el.value; });
+  document.querySelectorAll('.pillset').forEach(set=>{
+    S[set.dataset.toggle]=set.querySelector('button.on')?.dataset.v || '';
   });
+  S.experience=[...document.querySelectorAll('[data-exp]:checked')].map(el=>el.dataset.exp);
+  S.route=ROUTES.find(route=>route.id===document.querySelector('.route.on')?.dataset.id);
+  recompute();
 }
-
-function downloadPDF(){
-  const btns = document.querySelectorAll('#pdf-btn, [onclick="downloadPDF()"]');
-  btns.forEach(b=>{ b.dataset.origText=b.textContent; b.textContent='Формируем PDF…'; b.disabled=true; });
-  const restore = ()=> btns.forEach(b=>{ b.textContent=b.dataset.origText; b.disabled=false; });
-
-  const filename = 'Анкета_' + (S.name ? S.name.replace(/\s+/g,'_') : 'клиент') + '.pdf';
-  const opt = {
-    margin: 8,
-    filename,
-    image: { type:'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1000,
-      logging: true, onclone: preparePrintClone },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-    pagebreak: { mode:['css'] }
-  };
-
-  // wait for web fonts so text doesn't render blank/fallback mid-capture
-  const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-  ready.then(()=> html2pdf().set(opt).from(document.body).save())
-    .catch(err=>{
-      console.error('PDF export failed, falling back to browser print:', err);
-      alert('Не удалось автоматически собрать PDF. Открываю окно печати — выберите «Сохранить как PDF».');
-      window.print();
-    })
-    .finally(restore);
-}
+function downloadPDF(){ return AnketaPDF.download(); }
 
 /* ---------------- save to Google Sheet ---------------- */
 // Вставьте сюда URL веб-приложения Apps Script (см. apps-script/README.md)
@@ -770,7 +658,7 @@ function saveAnketa(){
     income: S.income||'', expense: S.expense||'', freeRest: document.getElementById('free-rest').textContent,
     cushion: S.cushion||'', loans: S.loans||'', hasInvest: S.hasInvest||'', storeWhere: S.storeWhere||'',
     goal: S.goal||'', goalSum: S.goalSum||'', years: S.years||'', started: S.started||'',
-    start: S.start||'', monthly: S.monthly||'', rate: S.rate||'',
+    start: S.start||'', monthly: S.monthly||'', rate: AnketaStrategy.annualRate*100,
     experience: (S.experience||[]).join(', '), expLevel: S.expLevel||'', improve: S.improve||'', interest: S.interest||'',
     barrier: S.barrier||'', ifDelay: S.ifDelay||'',
     route: S.route? S.route.name:'', routeCourse: S.route? S.route.course:'',

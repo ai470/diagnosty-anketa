@@ -1,0 +1,77 @@
+/* Shared with the isolated export document and the browser's Print command.
+   The screen stylesheet remains the source of the approved visual design. */
+.print-value,.print-choice{display:none}
+.pdf-frame{position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;pointer-events:none}
+.pdf-status{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:80;
+  max-width:min(560px,calc(100vw - 32px));padding:14px 20px;border-radius:12px;
+  background:var(--pine);color:#F6F3E9;box-shadow:var(--shadow);font-size:13px}
+.pdf-status:empty{display:none}
+.btn:disabled{cursor:wait;opacity:.7}
+@media print{
+  @page{
+    size:A4 portrait;
+    margin:12mm;
+    @bottom-left{content:'Монтериум';font-family:'Golos Text',sans-serif;font-size:8pt;color:#5C6B63}
+    @bottom-right{content:counter(page) ' / ' counter(pages);font-family:'Golos Text',sans-serif;font-size:8pt;color:#5C6B63}
+    @top-left{content:''}
+    @top-center{content:''}
+    @top-right{content:''}
+  }
+  html{scroll-behavior:auto}
+  body{margin:0;background:var(--paper);font-size:15px}
+  *,*::before,*::after{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    animation:none!important;transition:none!important;
+  }
+  .topbar,.rail,.overlay,.no-print,.pdf-status,.pdf-frame{display:none!important}
+  .wrap{display:block;max-width:none;margin:0;padding:22px 0 0}
+  main{min-width:0}
+  /* Print always uses the approved desktop grid, even on a narrow phone. */
+  .hero{padding:28px 22px 26px;break-inside:auto}
+  .hero h1{font-size:44px}
+  .hero-inner{max-width:none}
+  .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .grid.one{grid-template-columns:minmax(0,1fr)}
+  .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .routes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .calc-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .sum-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  section.card{scroll-margin-top:0;box-shadow:none;break-inside:avoid;margin-bottom:22px}
+  /* The opening answers follow the title even when the first section is
+     taller than a page; otherwise Chromium leaves a title-only sheet. */
+  #s1{break-inside:auto}
+  .sec-head{break-after:avoid;break-inside:avoid}
+  .field{display:block;break-inside:avoid}
+  .field>label{margin-bottom:6px;break-after:avoid}
+  .print-value{display:block;width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;line-height:1.45;min-height:44px;
+    white-space:pre-wrap;overflow-wrap:anywhere;orphans:3;widows:3}
+  [data-f]{display:none!important}
+  .print-choice{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+  .print-check{width:18px;height:18px;border:1px solid var(--muted);border-radius:3px;flex:none;position:relative}
+  .print-check.checked{background:var(--pine);border-color:var(--pine)}
+  .print-check.checked::after{content:'';position:absolute;left:5px;top:2px;width:5px;height:9px;
+    border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .tile,.route,.calc,.summary,.site-footer{break-inside:avoid}
+  .tile{padding:11px 10px}
+  .calc{overflow:visible}
+  .calc-inputs,.result,.res-row,.sum-card{min-width:0}
+  .res-row .v{flex-shrink:0;max-width:60%;overflow-wrap:anywhere}
+  .sum-card .txt,.route,.auto{overflow-wrap:anywhere;white-space:pre-wrap}
+  .route:hover{transform:none}
+  .route.on{box-shadow:inset 0 0 0 1px var(--gold)}
+  .route.on .check{display:block;font-size:0}
+  .route.on .check::after{content:'';position:absolute;left:8px;top:5px;width:5px;height:9px;
+    border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .print-only{display:block}
+  .site-footer{margin-top:22px}
+  .foot-inner{padding:24px 22px;flex-direction:row;align-items:center;gap:16px}
+  .foot-expert{flex:1 1 320px}
+  .socials{gap:8px}
+  .soc{width:34px;height:34px}
+  .soc svg{width:18px;height:18px}
+  .foot-legal p{padding:14px 22px 20px}
+  /* Native fragmentation preserves complete oversized answers. Do not clone
+     box decorations: Chromium duplicates padding and can insert empty sheets. */
+  .sum-card{break-inside:auto}
+}

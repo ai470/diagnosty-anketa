@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карта-диагностика финансового пути</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#10382C; --pine-2:#1C4A3A; --pine-3:#0B2A20;
+    --gold:#C4A052; --gold-2:#D8B968; --gold-soft:#F0E6CC;
+    --paper:#FBFAF6; --sage:#EAEFEA; --sage-2:#E0E8E1;
+    --ink:#14201B; --muted:#5C6B63; --line:#D7DFD8;
+    --rust:#B4593C; --rust-soft:#F5E4DC;
+    --ok:#2E7D5B;
+    --shadow:0 1px 2px rgba(16,56,44,.06), 0 8px 30px rgba(16,56,44,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Golos Text",system-ui,sans-serif; font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{margin:0; font-weight:600}
+  .serif{font-family:"Cormorant Garamond",Georgia,serif}
+  input,select,textarea,button{font-family:inherit; font-size:inherit; color:inherit}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40; background:var(--pine); color:#F4F0E4;
+    border-bottom:1px solid var(--pine-3);
+    display:flex; align-items:center; gap:18px; padding:11px 22px;
+  }
+  .brand{display:flex; align-items:center; gap:11px; min-width:0}
+  .crest{width:34px; height:34px; border:1.5px solid var(--gold); border-radius:50%;
+    display:grid; place-items:center; flex:none}
+  .crest span{font-family:"Cormorant Garamond",serif; font-weight:700; color:var(--gold-2); font-size:19px; line-height:1}
+  .brand b{font-weight:600; letter-spacing:.2px}
+  .brand small{display:block; color:#B9C7BC; font-size:11.5px; font-weight:400; letter-spacing:.4px}
+  .top-meta{margin-left:auto; display:flex; align-items:center; gap:20px; font-size:12.5px; color:#C7D3C9}
+  .top-meta b{color:#F4F0E4; font-weight:600}
+  .top-actions{display:flex; gap:9px}
+  .btn{
+    border:1px solid transparent; border-radius:999px; padding:8px 15px; cursor:pointer;
+    font-weight:600; font-size:13px; transition:transform .12s ease, background .15s ease, box-shadow .15s ease;
+    display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-gold{background:var(--gold); color:#241B06}
+  .btn-gold:hover{background:var(--gold-2)}
+  .btn-ghost{background:transparent; color:#EFECE0; border-color:#3C5B4C}
+  .btn-ghost:hover{background:var(--pine-2)}
+  .btn-line{background:#fff; color:var(--pine); border-color:var(--line)}
+  .btn-line:hover{border-color:var(--gold); color:var(--pine-2)}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(160deg,var(--pine) 0%, var(--pine-2) 100%);
+    color:#F1EEE2; padding:34px 22px 30px;
+    border-bottom:2px solid var(--gold);
+  }
+  .hero-inner{max-width:1180px; margin:0 auto}
+  .hero .eyebrow{color:var(--gold-2); font-size:13px; letter-spacing:2px; text-transform:uppercase; font-weight:600}
+  .hero h1{font-size:44px; line-height:1.02; margin:8px 0 20px; max-width:16ch}
+  .journey{display:flex; align-items:stretch; gap:0; flex-wrap:wrap}
+  .pt{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.28); border-radius:12px;
+    padding:14px 18px; flex:1 1 300px; min-width:0}
+  .pt .lbl{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-2); font-weight:600}
+  .pt .val{font-family:"Cormorant Garamond",serif; font-size:22px; line-height:1.15; margin-top:4px; color:#F6F3E9; min-height:1.2em}
+  .pt .val.empty{color:#7E9285; font-style:italic; font-size:17px}
+  .arrow{display:grid; place-items:center; padding:0 16px; color:var(--gold); font-size:26px; flex:none}
+  @media(max-width:720px){ .hero h1{font-size:32px} .arrow{transform:rotate(90deg); padding:6px} }
+
+  /* ---------- Layout ---------- */
+  .wrap{max-width:1180px; margin:0 auto; padding:26px 22px 80px; display:grid;
+    grid-template-columns:220px 1fr; gap:34px; align-items:start}
+  @media(max-width:900px){ .wrap{grid-template-columns:1fr} .rail{display:none} }
+
+  .rail{position:sticky; top:74px}
+  .rail ol{list-style:none; margin:0; padding:0}
+  .rail li{margin:0}
+  .rail a{display:flex; align-items:center; gap:12px; padding:9px 10px; border-radius:10px;
+    color:var(--muted); text-decoration:none; font-weight:500; font-size:13.5px; transition:background .15s}
+  .rail a:hover{background:var(--sage)}
+  .rail a.active{background:#fff; color:var(--pine); box-shadow:var(--shadow)}
+  .rail .num{width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line);
+    display:grid; place-items:center; font-family:"Cormorant Garamond",serif; font-weight:700; font-size:14px; flex:none; color:var(--muted)}
+  .rail a.active .num{border-color:var(--gold); color:var(--pine); background:var(--gold-soft)}
+  .rail .num.done{background:var(--pine); border-color:var(--pine); color:var(--gold-2)}
+  .rail-tip{margin-top:16px; padding:12px 13px; background:var(--sage); border-radius:10px; font-size:12px; color:var(--muted); line-height:1.45}
+
+  /* ---------- Sections ---------- */
+  section.card{background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:26px 28px; margin-bottom:22px; scroll-margin-top:80px}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:20px;
+    padding-bottom:14px; border-bottom:1px solid var(--line)}
+  .sec-head .idx{font-family:"Cormorant Garamond",serif; font-size:34px; font-weight:700; color:var(--gold); line-height:1}
+  .sec-head h2{font-size:22px; font-weight:600}
+  .sec-head p{margin:2px 0 0; color:var(--muted); font-size:13px}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px 22px}
+  .grid.one{grid-template-columns:1fr}
+  .grid .span2{grid-column:1/-1}
+  @media(max-width:640px){ .grid{grid-template-columns:1fr} }
+
+  .field{display:flex; flex-direction:column; gap:6px; min-width:0}
+  .field > label{font-size:13px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:7px}
+  .field .hint{font-weight:400; color:var(--muted); font-size:11.5px}
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
+    transition:border-color .15s, box-shadow .15s; outline:none;
+  }
+  textarea{resize:vertical; min-height:56px; line-height:1.45}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(196,160,82,.16)}
+  input::placeholder,textarea::placeholder{color:#A9B4AC}
+
+  /* yes/no pill toggle */
+  .pillset{display:inline-flex; background:var(--sage); border-radius:999px; padding:3px; gap:2px}
+  .pillset button{border:none; background:transparent; padding:7px 16px; border-radius:999px; cursor:pointer;
+    font-weight:600; font-size:13px; color:var(--muted); transition:.15s}
+  .pillset button.on{background:#fff; color:var(--pine); box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .pillset.neg button.on{color:var(--rust)}
+
+  /* checkbox tiles */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px}
+  .tile{display:flex; align-items:center; gap:10px; padding:11px 13px; border:1px solid var(--line);
+    border-radius:11px; cursor:pointer; transition:.15s; user-select:none}
+  .tile:hover{border-color:var(--gold)}
+  .tile.on{background:var(--gold-soft); border-color:var(--gold)}
+  .tile input{width:18px; height:18px; accent-color:var(--pine); flex:none}
+  .tile span{font-size:13.5px; font-weight:500}
+
+  .auto{background:var(--sage); border:1px dashed var(--gold); color:var(--pine-2); padding:10px 12px;
+    border-radius:10px; font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .auto small{font-weight:500; color:var(--muted); font-size:11px}
+
+  /* ---------- Calculator ---------- */
+  .calc{margin-top:6px; border:1px solid var(--gold); border-radius:var(--radius); overflow:hidden}
+  .calc-head{background:linear-gradient(120deg,var(--pine),var(--pine-2)); color:#F1EEE2; padding:16px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  .calc-head h3{font-family:"Cormorant Garamond",serif; font-size:23px; font-weight:600}
+  .calc-head small{color:#BFCcc0; font-size:12px}
+  .calc-body{padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:22px}
+  @media(max-width:760px){ .calc-body{grid-template-columns:1fr} }
+  .calc-inputs{display:grid; gap:13px}
+  .result{background:var(--pine-3); color:#EDEBDD; border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:16px}
+  .gauge{position:relative; width:150px; height:150px; margin:0 auto}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .pct{position:absolute; inset:0; display:grid; place-items:center; text-align:center}
+  .gauge .pct b{font-family:"Cormorant Garamond",serif; font-size:34px; color:var(--gold-2); line-height:1}
+  .gauge .pct small{display:block; font-size:10.5px; color:#A9BBAD; letter-spacing:1px; text-transform:uppercase; margin-top:2px}
+  .res-row{display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.1)}
+  .res-row:last-child{border:none; padding-bottom:0}
+  .res-row .k{font-size:12.5px; color:#AEBFB2}
+  .res-row .v{font-family:"Cormorant Garamond",serif; font-size:21px; color:#F4F1E6}
+  .res-row .v.rust{color:#E7A98F}
+  .res-row .v.gold{color:var(--gold-2)}
+  .nudge{background:var(--rust-soft); border-left:3px solid var(--rust); color:#7A3421; padding:12px 14px;
+    border-radius:8px; font-size:13px; line-height:1.5; margin-top:14px}
+  .nudge b{color:var(--rust)}
+
+  /* ---------- Routes ---------- */
+  .routes{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px}
+  .route{border:1px solid var(--line); border-radius:12px; padding:16px; cursor:pointer; transition:.15s;
+    display:flex; flex-direction:column; gap:8px; position:relative; background:#fff}
+  .route:hover{border-color:var(--gold); transform:translateY(-2px)}
+  .route.on{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold), var(--shadow); background:#FFFDF7}
+  .route h3{font-family:"Cormorant Garamond",serif; font-size:20px; color:var(--pine)}
+  .route .course{font-size:12px; font-weight:700; color:var(--gold); letter-spacing:.3px}
+  .route p{margin:0; font-size:12.5px; color:var(--muted); line-height:1.45}
+  .route .tag{font-size:11px; color:var(--pine-2); background:var(--sage); border-radius:6px; padding:3px 7px; align-self:flex-start}
+  .route-link{margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
+    background:var(--pine); color:#F1EEE2; text-decoration:none; padding:8px 14px; border-radius:999px;
+    font-weight:600; font-size:12.5px; transition:.16s}
+  .route-link:hover{background:var(--gold); color:#241B06}
+  .route .check{position:absolute; top:12px; right:12px; width:22px; height:22px; border-radius:50%;
+    background:var(--gold); color:#fff; display:none; place-items:center; font-size:13px}
+  .route.on .check{display:grid}
+  .suggest{font-size:12.5px; color:var(--muted); margin:0 0 14px}
+  .suggest b{color:var(--pine-2)}
+
+  /* ---------- Summary ---------- */
+  .summary{background:linear-gradient(135deg,var(--pine),var(--pine-2)); color:#F1EEE2; border-radius:var(--radius); padding:26px 28px}
+  .summary h2{font-family:"Cormorant Garamond",serif; font-size:26px; color:#F6F3E9; margin-bottom:18px}
+  .sum-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
+  @media(max-width:760px){ .sum-grid{grid-template-columns:1fr} }
+  .sum-card{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.25); border-radius:11px; padding:16px}
+  .sum-card .lbl{font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-2); font-weight:600; margin-bottom:6px}
+  .sum-card .txt{font-family:"Cormorant Garamond",serif; font-size:19px; line-height:1.2; color:#F6F3E9; min-height:1.2em}
+  .sum-card .txt.empty{color:#8AA093; font-style:italic; font-size:15px}
+
+  /* ---------- Bitrix modal ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(11,42,32,.55); z-index:60; display:none; align-items:center; justify-content:center; padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:#fff; border-radius:16px; max-width:560px; width:100%; box-shadow:0 30px 80px rgba(0,0,0,.3); overflow:hidden; max-height:90vh; display:flex; flex-direction:column}
+  .modal-head{background:#2067c9; color:#fff; padding:18px 22px; display:flex; align-items:center; gap:12px}
+  .modal-head b{font-size:17px}
+  .modal-head small{color:#cfe0f7; font-size:12px; display:block}
+  .modal-body{padding:20px 22px; overflow:auto}
+  .modal-body p{margin:0 0 14px; color:var(--muted); font-size:13.5px; line-height:1.5}
+  .kv{border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .kv div{display:flex; justify-content:space-between; gap:14px; padding:9px 13px; font-size:12.5px; border-bottom:1px solid var(--line)}
+  .kv div:last-child{border:none}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-weight:600; text-align:right; max-width:60%}
+  .modal-foot{padding:16px 22px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px}
+  .modal-foot .status{font-size:12.5px; color:var(--ok); font-weight:600; display:flex; align-items:center; gap:6px}
+
+  /* ---------- Footer ---------- */
+  .site-footer{background:var(--pine-3); color:#CBD6CD; border-top:2px solid var(--gold); margin-top:20px}
+  .foot-inner{max-width:1180px; margin:0 auto; padding:40px 22px 30px;
+    display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap}
+  .foot-expert{display:flex; align-items:center; gap:14px; min-width:0}
+  .foot-expert .crest{width:44px; height:44px; border-color:var(--gold)}
+  .foot-expert .crest span{font-size:24px}
+  .foot-expert b{color:#F4F0E4; font-family:"Cormorant Garamond",serif; font-size:22px; font-weight:600; display:block; line-height:1.1}
+  .foot-expert small{color:#95A89B; font-size:12.5px; letter-spacing:.3px}
+  .socials{display:flex; gap:12px; flex-wrap:wrap}
+  .soc{width:46px; height:46px; border-radius:50%; border:1px solid #3C5B4C; background:rgba(255,255,255,.03);
+    display:grid; place-items:center; color:#DCE6DD; text-decoration:none; transition:.18s; flex:none}
+  .soc:hover{border-color:var(--gold); color:var(--gold-2); background:var(--pine-2); transform:translateY(-2px)}
+  .soc svg{width:22px; height:22px; fill:currentColor}
+  .soc b{font-family:"Golos Text",sans-serif; font-weight:700; font-size:15px; letter-spacing:.5px}
+  .foot-legal{border-top:1px solid rgba(255,255,255,.08); }
+  .foot-legal p{max-width:1180px; margin:0 auto; padding:16px 22px 26px; color:#7E9285; font-size:11.5px; line-height:1.55; text-align:center}
+  @media(max-width:640px){ .foot-inner{flex-direction:column; align-items:flex-start} }
+
+  /* ---------- Print ---------- */
+  .print-only{display:none}
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff; font-size:12px}
+    .topbar,.rail,.rail-tip,.overlay,.no-print,.calc-inputs .pillset{display:none !important}
+    .hero{padding:0 0 14px; background:#fff; color:var(--ink); border-bottom:2px solid var(--gold)}
+    .hero .eyebrow{color:var(--gold)}
+    .hero h1{color:var(--ink); font-size:30px}
+    .pt{background:#fafafa; border-color:var(--line)}
+    .pt .lbl{color:#8a6d24}
+    .pt .val{color:var(--ink)}
+    .wrap{display:block; max-width:none; padding:0}
+    section.card{box-shadow:none; border-color:#ccc; break-inside:avoid; page-break-inside:avoid; margin-bottom:12px}
+    .summary,.calc-head,.result,.site-footer{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+    .site-footer{margin-top:14px; break-inside:avoid}
+    .print-only{display:block}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar no-print">
+  <div class="brand">
+    <div class="crest"><span>К</span></div>
+    <div>
+      <b>Капитал нового уровня</b>
+      <small>Отдел диагностик · карта финансового пути</small>
+    </div>
+  </div>
+  <div class="top-meta">
+    <span>Клиент: <b id="m-name">—</b></span>
+    <span>Дата: <b id="m-date">—</b></span>
+    <span>Эксперт: <b id="m-expert">—</b></span>
+  </div>
+  <div class="top-actions">
+    <button class="btn btn-gold" onclick="window.print()">⤓ Скачать PDF</button>
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Карта-диагностика</div>
+    <h1 class="serif">Финансовый путь клиента</h1>
+    <div class="journey">
+      <div class="pt">
+        <div class="lbl">Точка А · где сейчас</div>
+        <div class="val empty" id="hero-a">заполняется на созвоне</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="pt">
+        <div class="lbl">Точка Б · цель через 3–5 лет</div>
+        <div class="val empty" id="hero-b">заполняется на созвоне</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="pt" style="border-color:var(--gold)">
+        <div class="lbl">Маршрут</div>
+        <div class="val empty" id="hero-route">выберите в блоке 6</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== RAIL ===== -->
+  <nav class="rail no-print">
+    <ol>
+      <li><a href="#s1" class="active"><span class="num" data-n="1">1</span> Знакомство</a></li>
+      <li><a href="#s2"><span class="num" data-n="2">2</span> Финансовая ситуация</a></li>
+      <li><a href="#s3"><span class="num" data-n="3">3</span> Цели и мотивация</a></li>
+      <li><a href="#s4"><span class="num" data-n="4">4</span> Опыт инвестирования</a></li>
+      <li><a href="#s5"><span class="num" data-n="5">5</span> Главный барьер</a></li>
+      <li><a href="#s6"><span class="num" data-n="6">6</span> Резюме встречи</a></li>
+    </ol>
+    <div class="rail-tip">Заполняйте карту вместе с клиентом, демонстрируя экран. По итогу — «Скачать PDF» и отправка в Битрикс.</div>
+  </nav>
+
+  <main>
+    <!-- SECTION 1 -->
+    <section class="card" id="s1">
+      <div class="sec-head"><span class="idx serif">1</span><div><h2>Знакомство</h2><p>Кто перед нами и что привело на диагностику</p></div></div>
+      <div class="grid">
+        <div class="field"><label>Имя и фамилия</label><input type="text" data-f="name" placeholder="Например, Анна Смирнова"></div>
+        <div class="field"><label>Дата диагностики</label><input type="date" data-f="date"></div>
+        <div class="field"><label>Эксперт</label><input type="text" data-f="expert" placeholder="Кто проводит"></div>
+        <div class="field"><label>Что привело вас на диагностику?</label><input type="text" data-f="reason" placeholder="Запрос клиента"></div>
+        <div class="field span2"><label>Где вы сейчас финансово? <span class="hint">— точка А</span></label><textarea data-f="pointA" placeholder="Текущая ситуация словами клиента"></textarea></div>
+        <div class="field span2"><label>Как хотите видеть жизнь через 3–5 лет? <span class="hint">— точка Б</span></label><textarea data-f="pointB" placeholder="Желаемая картина"></textarea></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="card" id="s2">
+      <div class="sec-head"><span class="idx serif">2</span><div><h2>Финансовая ситуация</h2><p>Доходы, расходы, запас прочности</p></div></div>
+      <div class="grid">
+        <div class="field"><label>Средний доход семьи, ₽/мес</label><input type="number" data-f="income" placeholder="150000"></div>
+        <div class="field"><label>Средние расходы семьи, ₽/мес</label><input type="number" data-f="expense" placeholder="170000"></div>
+        <div class="field span2"><label>Свободный остаток после расходов</label>
+          <div class="auto"><span id="free-rest">— ₽</span><small>считается автоматически: доход − расходы</small></div>
+        </div>
+        <div class="field"><label>Финансовая подушка?</label><div class="pillset" data-toggle="cushion"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
+        <div class="field"><label>Кредиты и обязательства?</label><div class="pillset neg" data-toggle="loans"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
+        <div class="field"><label>Накопления в инвест-инструментах?</label><div class="pillset" data-toggle="hasInvest"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
+        <div class="field"><label>Где храните накопления? <span class="hint">банки / фондовый / крипта / недвижимость</span></label><input type="text" data-f="storeWhere" placeholder="На вкладе"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="card" id="s3">
+      <div class="sec-head"><span class="idx serif">3</span><div><h2>Цели и мотивация</h2><p>Куда идём и что для этого уже делается</p></div></div>
+      <div class="grid">
+        <div class="field span2"><label>Главная финансовая цель сейчас</label><input type="text" data-f="goal" placeholder="Например, на обучение ребёнка"></div>
+        <div class="field"><label>Стоимость цели, ₽</label><input type="number" data-f="goalSum" placeholder="3000000"></div>
+        <div class="field"><label>Срок цели, лет</label><input type="number" data-f="years" placeholder="3"></div>
+        <div class="field"><label>Уже начали копить?</label><div class="pillset" data-toggle="started"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
+        <div class="field"><label>Сумма на старте, ₽ <span class="hint">уже накоплено / для старта</span></label><input type="number" data-f="start" placeholder="5000"></div>
+        <div class="field"><label>Готовы откладывать, ₽/мес</label><input type="number" data-f="monthly" placeholder="1000"></div>
+        <div class="field"><label>Ожидаемая доходность, %/год <span class="hint">для расчёта</span></label><input type="number" data-f="rate" placeholder="30"></div>
+      </div>
+
+      <!-- CALCULATOR -->
+      <div class="calc" style="margin-top:22px">
+        <div class="calc-head">
+          <div><h3 class="serif">Проверка стратегии — сложный процент</h3><small>Показываем клиенту разрыв между «как сейчас» и «как нужно»</small></div>
+        </div>
+        <div class="calc-body">
+          <div class="calc-inputs">
+            <div class="res-row" style="border-color:var(--line)"><span class="k" style="color:var(--muted)">Цель</span><span class="v serif" style="color:var(--pine)" id="c-goal">— ₽</span></div>
+            <div class="res-row" style="border-color:var(--line)"><span class="k" style="color:var(--muted)">Срок</span><span class="v serif" style="color:var(--pine)" id="c-term">— лет</span></div>
+            <div class="res-row" style="border-color:var(--line)"><span class="k" style="color:var(--muted)">Старт + пополнение</span><span class="v serif" style="color:var(--pine)" id="c-inputs">—</span></div>
+            <div class="nudge no-print" id="nudge">Заполните поля выше — покажем, достигается ли цель при текущей стратегии.</div>
+          </div>
+          <div class="result">
+            <div class="gauge">
+              <svg width="150" height="150" viewBox="0 0 150 150">
+                <circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="14"/>
+                <circle id="gauge-arc" cx="75" cy="75" r="64" fill="none" stroke="var(--gold)" stroke-width="14" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+              </svg>
+              <div class="pct"><div><b id="g-pct">0%</b><small>цели</small></div></div>
+            </div>
+            <div>
+              <div class="res-row"><span class="k">Накопится при текущей стратегии</span><span class="v" id="r-fv">— ₽</span></div>
+              <div class="res-row"><span class="k">Не хватит до цели</span><span class="v rust" id="r-gap">— ₽</span></div>
+              <div class="res-row"><span class="k">Нужно откладывать в месяц</span><span class="v gold" id="r-need">— ₽</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section class="card" id="s4">
+      <div class="sec-head"><span class="idx serif">4</span><div><h2>Опыт инвестирования</h2><p>С чем клиент уже работал и что хочет освоить</p></div></div>
+      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:10px">Есть ли у вас что-то из перечисленного:</label>
+      <div class="tiles" id="exp-tiles">
+        <label class="tile"><input type="checkbox" data-exp="Крипторынок"><span>Крипторынок</span></label>
+        <label class="tile"><input type="checkbox" data-exp="Фондовый рынок"><span>Фондовый рынок</span></label>
+        <label class="tile"><input type="checkbox" data-exp="Недвижимость"><span>Недвижимость</span></label>
+        <label class="tile"><input type="checkbox" data-exp="Банковские продукты"><span>Банковские продукты</span></label>
+        <label class="tile"><input type="checkbox" data-exp="Другое"><span>Другое</span></label>
+      </div>
+      <div class="grid one" style="margin-top:18px">
+        <div class="field"><label>Как оцениваете свой опыт? Какой есть результат?</label><textarea data-f="expLevel" placeholder="Словами клиента"></textarea></div>
+        <div class="grid" style="gap:16px 22px">
+          <div class="field"><label>Что хотели бы улучшить?</label><input type="text" data-f="improve" placeholder="Например, повысить доходность"></div>
+          <div class="field"><label>Какие инструменты интересно изучить?</label><input type="text" data-f="interest" placeholder="Например, облигации, недвижимость"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section class="card" id="s5">
+      <div class="sec-head"><span class="idx serif">5</span><div><h2>Главный барьер</h2><p>Что мешает и цена бездействия</p></div></div>
+      <div class="grid one">
+        <div class="field"><label>Что сейчас мешает достигать финансовую цель?</label><textarea data-f="barrier" placeholder="Ключевое препятствие"></textarea></div>
+        <div class="field"><label>Что будет, если продолжите откладывать цель?</label><textarea data-f="ifDelay" placeholder="Последствия бездействия"></textarea></div>
+      </div>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section class="card" id="s6">
+      <div class="sec-head"><span class="idx serif">6</span><div><h2>Резюме встречи</h2><p>Точка А → Точка Б → рекомендуемый маршрут</p></div></div>
+      <p class="suggest" id="route-suggest">Подсказка появится, когда заполните блок «Опыт инвестирования».</p>
+      <div class="routes" id="routes"></div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section class="summary" id="summary-block">
+      <h2 class="serif">Ваш маршрут к капиталу нового уровня</h2>
+      <div class="sum-grid">
+        <div class="sum-card"><div class="lbl">Точка А — где сейчас</div><div class="txt empty" id="sum-a">—</div></div>
+        <div class="sum-card"><div class="lbl">Точка Б — цель</div><div class="txt empty" id="sum-b">—</div></div>
+        <div class="sum-card" style="border-color:var(--gold)"><div class="lbl">Рекомендуемый маршрут</div><div class="txt empty" id="sum-route">—</div></div>
+      </div>
+      <div class="print-only" style="margin-top:16px; font-family:'Cormorant Garamond',serif; font-size:16px; color:#E9E5D6">
+        Накопится при текущей стратегии: <span id="print-fv">—</span> · это <span id="print-pct">—</span> цели. Рекомендуем откладывать <span id="print-need">—</span>/мес.
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="foot-inner">
+    <div class="foot-expert">
+      <div class="crest"><span>К</span></div>
+      <div>
+        <b>Татьяна Волкова</b>
+        <small>Эксперт по инвестициям · программа «Капитал нового уровня»</small>
+      </div>
+    </div>
+    <nav class="socials" aria-label="Социальные сети">
+      <a class="soc" href="https://t.me/volkovacapital" target="_blank" rel="noopener" title="Telegram" aria-label="Telegram">
+        <svg viewBox="0 0 24 24"><path d="M9.78 15.6l-.36 4.06c.52 0 .74-.22 1.01-.49l2.42-2.32 5.02 3.67c.92.51 1.58.24 1.83-.85l3.32-15.56.001-.001c.29-1.36-.49-1.9-1.39-1.56L1.15 9.4C-.18 9.92-.16 10.66.92 11l5.03 1.57L18.6 4.73c.55-.36 1.05-.16.64.2z"/></svg>
+      </a>
+      <a class="soc" href="https://vk.com/volkovacapital" target="_blank" rel="noopener" title="ВКонтакте" aria-label="ВКонтакте"><b>VK</b></a>
+      <a class="soc" href="https://www.youtube.com/@capitalvolkova" target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
+        <svg viewBox="0 0 24 24"><path d="M23.5 6.9c-.28-1.03-1.1-1.85-2.14-2.13C19.46 4.25 12 4.25 12 4.25s-7.46 0-9.36.52C1.6 5.05.78 5.87.5 6.9.02 8.8.02 12 .02 12s0 3.2.48 5.1c.28 1.03 1.1 1.85 2.14 2.13 1.9.52 9.36.52 9.36.52s7.46 0 9.36-.52a3.02 3.02 0 0 0 2.14-2.13c.48-1.9.48-5.1.48-5.1s0-3.2-.48-5.1zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg>
+      </a>
+      <a class="soc" href="https://max.ru/volkovacapital" target="_blank" rel="noopener" title="MAX" aria-label="MAX"><b>MAX</b></a>
+    </nav>
+  </div>
+  <div class="foot-legal">
+    <p>Материал носит образовательный характер и не является индивидуальной инвестиционной рекомендацией. Любые решения о вложениях принимаются с учётом своей ситуации и допустимого риска.</p>
+  </div>
+</footer>
+
+<!-- ===== BITRIX MODAL ===== -->
+<div class="overlay" id="bitrix-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div style="font-size:24px">B24</div>
+      <div><b>Отправка в карточку сделки · Битрикс24</b><small>Так карта попадёт в CRM (демо-предпросмотр полей)</small></div>
+    </div>
+    <div class="modal-body">
+      <p>Эти поля уйдут в карточку сделки. Технически это реализуется через входящий вебхук Битрикс24 (метод <code>crm.deal.update</code>) — карта пишется в пользовательские поля сделки, а PDF прикрепляется файлом.</p>
+      <div class="kv" id="bitrix-kv"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="status" id="bitrix-status">● Готово к отправке</span>
+      <div style="display:flex; gap:9px">
+        <button class="btn btn-line" onclick="closeBitrix()">Закрыть</button>
+        <button class="btn btn-gold" onclick="fakeSend()">Отправить в сделку</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- state ---------------- */
+const S = {};
+const fmt = n => isFinite(n) ? new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n)) : '—';
+const rub = n => fmt(n)+' ₽';
+
+/* text/number/date/textarea binding */
+document.querySelectorAll('[data-f]').forEach(el=>{
+  el.addEventListener('input',()=>{ S[el.dataset.f]=el.value; recompute(); });
+});
+
+/* yes/no pills */
+document.querySelectorAll('.pillset').forEach(set=>{
+  set.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      set.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); S[set.dataset.toggle]=b.dataset.v; recompute();
+    });
+  });
+});
+
+/* experience tiles */
+document.querySelectorAll('[data-exp]').forEach(cb=>{
+  cb.addEventListener('change',()=>{
+    cb.closest('.tile').classList.toggle('on',cb.checked);
+    S.experience = [...document.querySelectorAll('[data-exp]:checked')].map(x=>x.dataset.exp);
+    suggestRoute(); recompute();
+  });
+});
+
+/* ---------------- routes ---------------- */
+const ROUTES = [
+  {id:'base', name:'Финансовая основа', course:'Личный капитал', when:'нет системы и понимания денег', desc:'Порядок в финансах, цели, план создания капитала', tag:'старт', url:'https://kapital.monterium-edu.ru/kurs'},
+  {id:'realty', name:'Недвижимость', course:'Доходный метр', when:'интерес к объектам и доходу', desc:'Система инвестирования в недвижимость', tag:'актив', url:'https://kvartirnyy-vopros.monterium-edu.ru/dokhodnyy_metr'},
+  {id:'stock', name:'Фондовый рынок', course:'Портфель на фондовом рынке', when:'акции, облигации, фонды', desc:'Навык создания инвестиционного портфеля', tag:'портфель', url:'https://fondovyi.monterium-edu.ru/kurs/'},
+  {id:'trade', name:'Торги', course:'Торги. Инвестиционный подход', when:'активы ниже рынка', desc:'Инвестиционный подход к торгам', tag:'ниже рынка', url:'https://torgi.monterium-edu.ru/'},
+  {id:'crypto', name:'Криптовалюта', course:'Система', when:'цифровые активы', desc:'Понимание рынка и управление рисками', tag:'цифра', url:'https://monterium-edu.ru/system'},
+];
+const routesEl = document.getElementById('routes');
+ROUTES.forEach(r=>{
+  const d=document.createElement('div'); d.className='route'; d.dataset.id=r.id;
+  d.innerHTML=`<div class="check">✓</div><span class="course">Курс «${r.course}»</span><h3 class="serif">${r.name}</h3><p>${r.desc}</p><span class="tag">Когда: ${r.when}</span><a class="route-link" href="${r.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Открыть курс →</a>`;
+  d.onclick=()=>{ document.querySelectorAll('.route').forEach(x=>x.classList.remove('on')); d.classList.add('on'); S.route=r; recompute(); };
+  routesEl.appendChild(d);
+});
+
+/* soft auto-suggestion from interests/experience */
+function suggestRoute(){
+  const t=((S.interest||'')+' '+(S.improve||'')+' '+(S.goal||'')).toLowerCase();
+  let hint='Финансовая основа';
+  if(/недвиж|метр|кварт|объект/.test(t)) hint='Недвижимость';
+  else if(/облиг|акци|фонд|портфел|биржа/.test(t)) hint='Фондовый рынок';
+  else if(/крипт|битк|цифров/.test(t)) hint='Криптовалюта';
+  else if(/торг|аукцион|банкрот/.test(t)) hint='Торги';
+  document.getElementById('route-suggest').innerHTML =
+    `Авто-подсказка по ответам клиента: <b>${hint}</b>. Финальный маршрут выбирает эксперт — нажмите на карточку.`;
+}
+
+/* ---------------- compute ---------------- */
+function recompute(){
+  // mirror meta
+  document.getElementById('m-name').textContent = S.name||'—';
+  document.getElementById('m-date').textContent = S.date? new Date(S.date).toLocaleDateString('ru-RU'):'—';
+  document.getElementById('m-expert').textContent = S.expert||'—';
+
+  // hero + summary A/B
+  setText('hero-a', S.pointA); setText('hero-b', S.pointB);
+  setText('sum-a', S.pointA); setText('sum-b', S.pointB);
+
+  // free rest
+  const inc=+S.income||0, exp=+S.expense||0;
+  const rest = (S.income||S.expense)? inc-exp : null;
+  const fr=document.getElementById('free-rest');
+  fr.textContent = rest===null?'— ₽':rub(rest);
+  fr.style.color = rest<0? 'var(--rust)':'var(--pine-2)';
+
+  // calculator
+  const goal=+S.goalSum||0, years=+S.years||0, start=+S.start||0, pmt=+S.monthly||0, rate=(+S.rate||0)/100;
+  document.getElementById('c-goal').textContent = goal? rub(goal):'— ₽';
+  document.getElementById('c-term').textContent = years? years+' лет':'— лет';
+  document.getElementById('c-inputs').textContent = (start||pmt)? rub(start)+' + '+fmt(pmt)+'/мес':'—';
+
+  const months=Math.round(years*12), r=rate/12;
+  let fv=null;
+  if(months>0){
+    if(r>0){ const g=Math.pow(1+r,months); fv=start*g + pmt*((g-1)/r); }
+    else fv=start+pmt*months;
+  }
+  const arc=document.getElementById('gauge-arc'), C=402;
+  if(fv!==null && goal>0){
+    const pct=fv/goal;
+    document.getElementById('r-fv').textContent=rub(fv);
+    document.getElementById('g-pct').textContent=(pct*100<10? (pct*100).toFixed(1):Math.round(pct*100))+'%';
+    const gap=Math.max(goal-fv,0);
+    document.getElementById('r-gap').textContent=rub(gap);
+    // required monthly to reach goal
+    let need=0;
+    if(months>0){ if(r>0){const g=Math.pow(1+r,months); need=(goal-start*g)/((g-1)/r);} else need=(goal-start)/months; }
+    document.getElementById('r-need').textContent=rub(Math.max(need,0));
+    arc.style.strokeDashoffset = C*(1-Math.min(pct,1));
+    // nudge
+    const nd=document.getElementById('nudge');
+    if(pct>=1){ nd.style.background='var(--sage)'; nd.style.borderColor='var(--ok)'; nd.style.color='var(--pine)';
+      nd.innerHTML='Отлично — при текущей стратегии цель <b style="color:var(--ok)">достигается</b>. Можно усиливать доходность.'; }
+    else { nd.style.background='var(--rust-soft)'; nd.style.borderColor='var(--rust)'; nd.style.color='#7A3421';
+      nd.innerHTML=`При текущей стратегии цель закрывается лишь на <b>${(pct*100).toFixed(1)}%</b>. Чтобы достичь её за срок, нужно откладывать около <b>${rub(Math.max(need,0))}/мес</b> — против нынешних ${fmt(pmt)}/мес.`; }
+    // print line
+    document.getElementById('print-fv').textContent=rub(fv);
+    document.getElementById('print-pct').textContent=(pct*100).toFixed(1)+'%';
+    document.getElementById('print-need').textContent=rub(Math.max(need,0));
+  } else {
+    ['r-fv','r-gap','r-need'].forEach(id=>document.getElementById(id).textContent='— ₽');
+    document.getElementById('g-pct').textContent='0%'; arc.style.strokeDashoffset=C;
+  }
+
+  // route mirrors
+  if(S.route){
+    setText('hero-route', S.route.name);
+    setText('sum-route', S.route.name+' · курс «'+S.route.course+'»');
+  }
+}
+function setText(id,val){
+  const el=document.getElementById(id); if(!el) return;
+  if(val && String(val).trim()){ el.textContent=val; el.classList.remove('empty'); }
+  else { el.classList.add('empty'); }
+}
+
+/* ---------------- rail scroll-spy ---------------- */
+const links=[...document.querySelectorAll('.rail a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+window.addEventListener('scroll',()=>{
+  let i=secs.findIndex((s,idx)=> s.getBoundingClientRect().top>120 );
+  if(i===-1)i=secs.length; i=Math.max(0,i-1);
+  links.forEach((a,idx)=>a.classList.toggle('active',idx===i));
+},{passive:true});
+
+/* ---------------- Bitrix modal ---------------- */
+function openBitrix(){
+  const kv=document.getElementById('bitrix-kv');
+  const rows=[
+    ['UF_CRM_CLIENT', S.name||'—'],
+    ['UF_CRM_DATE', S.date? new Date(S.date).toLocaleDateString('ru-RU'):'—'],
+    ['UF_CRM_EXPERT', S.expert||'—'],
+    ['UF_CRM_POINT_A', S.pointA||'—'],
+    ['UF_CRM_POINT_B', S.pointB||'—'],
+    ['UF_CRM_GOAL', S.goal? (S.goal+' · '+rub(+S.goalSum||0)):'—'],
+    ['UF_CRM_FREE_REST', document.getElementById('free-rest').textContent],
+    ['UF_CRM_GOAL_PCT', document.getElementById('g-pct').textContent],
+    ['UF_CRM_ROUTE', S.route? (S.route.name+' / '+S.route.course):'—'],
+    ['FILE', 'Карта-диагностика.pdf'],
+  ];
+  kv.innerHTML=rows.map(([k,v])=>`<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  document.getElementById('bitrix-status').innerHTML='● Готово к отправке';
+  document.getElementById('bitrix-status').style.color='var(--muted)';
+  document.getElementById('bitrix-overlay').classList.add('open');
+}
+function closeBitrix(){ document.getElementById('bitrix-overlay').classList.remove('open'); }
+function fakeSend(){
+  const st=document.getElementById('bitrix-status');
+  st.innerHTML='● Отправка…'; st.style.color='var(--muted)';
+  setTimeout(()=>{ st.innerHTML='✓ Записано в сделку · PDF прикреплён'; st.style.color='var(--ok)'; },800);
+}
+document.getElementById('bitrix-overlay').addEventListener('click',e=>{ if(e.target.id==='bitrix-overlay')closeBitrix(); });
+
+/* ---------------- demo autofill ---------------- */
+function fillDemo(){
+  const data={name:'Анна Смирнова',date:new Date().toISOString().slice(0,10),expert:'Мария',
+    reason:'Хочу разобраться с деньгами',pointA:'Есть кредиты и долги, доход меньше расходов',
+    pointB:'Есть капитал и уверенность в завтрашнем дне',income:150000,expense:170000,
+    storeWhere:'На вкладе',goal:'На обучение ребёнка через 4 года',goalSum:3000000,years:3,
+    start:5000,monthly:1000,rate:30,expLevel:'Почти ничего не знаю, результата нет',
+    improve:'Повысить доходность',interest:'Облигации, фондовый рынок',
+    barrier:'Не хватает свободных денег и системы',ifDelay:'Цель отодвинется ещё на годы'};
+  Object.entries(data).forEach(([k,v])=>{
+    const el=document.querySelector(`[data-f="${k}"]`); if(el){ el.value=v; S[k]=v; }
+  });
+  setPill('cushion','да'); setPill('loans','да'); setPill('hasInvest','да'); setPill('started','да');
+  ['Крипторынок','Банковские продукты'].forEach(x=>{
+    const cb=document.querySelector(`[data-exp="${x}"]`); if(cb){cb.checked=true; cb.closest('.tile').classList.add('on');}
+  });
+  S.experience=['Крипторынок','Банковские продукты'];
+  suggestRoute(); recompute();
+  // preselect stock route as example
+  const rc=document.querySelector('.route[data-id="stock"]'); if(rc)rc.click();
+}
+function setPill(name,val){
+  const set=document.querySelector(`.pillset[data-toggle="${name}"]`); if(!set)return;
+  set.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===val));
+  S[name]=val;
+}
+recompute();
+</script>
+</body>
+</html>

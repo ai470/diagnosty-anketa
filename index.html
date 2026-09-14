@@ -247,6 +247,20 @@
     .site-footer{margin-top:14px; break-inside:avoid}
     .print-only{display:block}
   }
+
+  /* ---------- Force-print (used for PDF export via html2pdf) ---------- */
+  .force-print body{background:#fff}
+  .force-print .topbar,.force-print .rail,.force-print .rail-tip,.force-print .overlay,.force-print .no-print,.force-print .calc-inputs .pillset{display:none !important}
+  .force-print .hero{padding:0 0 14px; background:#fff; color:var(--ink); border-bottom:2px solid var(--gold)}
+  .force-print .hero .eyebrow{color:var(--gold)}
+  .force-print .hero h1{color:var(--ink); font-size:30px}
+  .force-print .pt{background:#fafafa; border-color:var(--line)}
+  .force-print .pt .lbl{color:#8a6d24}
+  .force-print .pt .val{color:var(--ink)}
+  .force-print .wrap{display:block; max-width:none; padding:0}
+  .force-print section.card{box-shadow:none; border-color:#ccc; margin-bottom:12px}
+  .force-print .site-footer{margin-top:14px}
+  .force-print .print-only{display:block}
 </style>
 </head>
 <body>
@@ -268,7 +282,7 @@
   <div class="top-actions">
     <span id="save-status" style="font-size:12px; color:#C7D3C9; margin-right:2px"></span>
     <button class="btn btn-line" onclick="saveAnketa()">💾 Сохранить анкету</button>
-    <button class="btn btn-gold" onclick="window.print()">⤓ Скачать PDF</button>
+    <button class="btn btn-gold" id="pdf-btn" onclick="downloadPDF()">⤓ Скачать PDF</button>
   </div>
 </div>
 
@@ -431,6 +445,14 @@
         Накопится при текущей стратегии: <span id="print-fv">—</span> · это <span id="print-pct">—</span> цели. Рекомендуем откладывать <span id="print-need">—</span>/мес.
       </div>
     </section>
+
+    <!-- FINAL SAVE -->
+    <section class="card no-print" style="text-align:center; padding:30px 28px">
+      <p style="margin:0 0 14px; color:var(--muted); font-size:14px">Анкета заполнена? Сохраните её в общую таблицу.</p>
+      <button class="btn btn-gold" style="padding:12px 26px; font-size:14.5px" onclick="saveAnketa()">💾 Сохранить анкету</button>
+      <button class="btn btn-line" style="padding:12px 26px; font-size:14.5px; margin-left:10px" onclick="downloadPDF()">⤓ Скачать PDF</button>
+      <div id="save-status-bottom" style="margin-top:12px; font-size:12.5px; color:var(--muted)"></div>
+    </section>
   </main>
 </div>
 
@@ -481,6 +503,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 /* ---------------- state ---------------- */
 const S = {};
@@ -673,15 +696,40 @@ function setPill(name,val){
 }
 recompute();
 
+/* ---------------- PDF export ---------------- */
+function downloadPDF(){
+  const btns = document.querySelectorAll('#pdf-btn, [onclick="downloadPDF()"]');
+  btns.forEach(b=>{ b.dataset.origText=b.textContent; b.textContent='Формируем PDF…'; b.disabled=true; });
+
+  const filename = 'Анкета_' + (S.name ? S.name.replace(/\s+/g,'_') : 'клиент') + '.pdf';
+  const opt = {
+    margin: 8,
+    filename,
+    image: { type:'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 900,
+      onclone: (doc)=>{ doc.documentElement.classList.add('force-print'); } },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak: { mode:['css','legacy'] }
+  };
+
+  html2pdf().set(opt).from(document.body).save().finally(()=>{
+    btns.forEach(b=>{ b.textContent=b.dataset.origText; b.disabled=false; });
+  });
+}
+
 /* ---------------- save to Google Sheet ---------------- */
 // Вставьте сюда URL веб-приложения Apps Script (см. apps-script/README.md)
 const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbycLZS1fWsgF7ZK6Y78s2DMfetubdLJqP8IDhVunicwIRwAjeqLb93eU38JGJNfzJJa/exec';
 
 function saveAnketa(){
   const status = document.getElementById('save-status');
+  const statusBottom = document.getElementById('save-status-bottom');
+  const setStatus = (text,color)=>{
+    status.textContent = text; status.style.color = color;
+    if(statusBottom){ statusBottom.textContent = text; statusBottom.style.color = color; }
+  };
   if(!SHEET_WEBAPP_URL || SHEET_WEBAPP_URL.indexOf('ВСТАВЬТЕ')===0){
-    status.textContent = 'Не настроено сохранение (см. apps-script/README.md)';
-    status.style.color = '#E7A98F';
+    setStatus('Не настроено сохранение (см. apps-script/README.md)', '#E7A98F');
     return;
   }
   const payload = {
@@ -699,18 +747,16 @@ function saveAnketa(){
     forecastPct: document.getElementById('g-pct').textContent,
     forecastNeed: document.getElementById('r-need').textContent,
   };
-  status.textContent = 'Сохранение…'; status.style.color = '#C7D3C9';
+  setStatus('Сохранение…', '#C7D3C9');
   fetch(SHEET_WEBAPP_URL, {
     method:'POST',
     mode:'no-cors',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify(payload)
   }).then(()=>{
-    status.textContent = '✓ Анкета сохранена в таблицу';
-    status.style.color = '#BFE3CF';
+    setStatus('✓ Анкета сохранена в таблицу', '#2E7D5B');
   }).catch(()=>{
-    status.textContent = 'Ошибка сохранения — проверьте подключение';
-    status.style.color = '#E7A98F';
+    setStatus('Ошибка сохранения — проверьте подключение', '#B4593C');
   });
 }
 </script>

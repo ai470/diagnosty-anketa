@@ -35,7 +35,7 @@ rollback() {
             if [[ "$existed" == 1 ]]; then
                 DEPLOY_REVISION="$previous" pm2 startOrReload ecosystem.config.cjs --only diagnosty-anketa --update-env --silent
             else
-                pm2 delete diagnosty-anketa
+                pm2 delete diagnosty-anketa --silent
             fi
         fi
         cp -p "$backup/nginx.conf" "$nginx_site"
@@ -63,7 +63,15 @@ done
 cp deploy/nginx.conf "$nginx_site"
 nginx -t
 systemctl reload nginx
-curl -fsS --max-time 15 --resolve diagnostika-anketa.monterium-edu.ru:443:127.0.0.1 https://diagnostika-anketa.monterium-edu.ru/health | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>{try{process.exit(JSON.parse(s).revision===process.argv[1]?0:1)}catch{process.exit(1)}})' "$revision"
+# Nginx reload returns before new workers necessarily accept connections.
+healthy=0
+for attempt in {1..20}; do
+    if curl -fsS --max-time 3 --resolve diagnostika-anketa.monterium-edu.ru:443:127.0.0.1 https://diagnostika-anketa.monterium-edu.ru/health | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>{try{process.exit(JSON.parse(s).revision===process.argv[1]?0:1)}catch{process.exit(1)}})' "$revision"; then
+        healthy=1; break
+    fi
+    sleep 1
+done
+[[ "$healthy" == 1 ]]
 curl -fsS --max-time 15 --resolve diagnostika-anketa.monterium-edu.ru:443:127.0.0.1 https://diagnostika-anketa.monterium-edu.ru/index.html | cmp - index.html
 pm2 save --silent
 trap - ERR

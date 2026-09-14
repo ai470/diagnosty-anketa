@@ -266,6 +266,8 @@
     <span>Эксперт: <b id="m-expert">—</b></span>
   </div>
   <div class="top-actions">
+    <span id="save-status" style="font-size:12px; color:#C7D3C9; margin-right:2px"></span>
+    <button class="btn btn-line" onclick="saveAnketa()">💾 Сохранить анкету</button>
     <button class="btn btn-gold" onclick="window.print()">⤓ Скачать PDF</button>
   </div>
 </div>
@@ -670,6 +672,47 @@ function setPill(name,val){
   S[name]=val;
 }
 recompute();
+
+/* ---------------- save to Google Sheet ---------------- */
+// Вставьте сюда URL веб-приложения Apps Script (см. apps-script/README.md)
+const SHEET_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbycLZS1fWsgF7ZK6Y78s2DMfetubdLJqP8IDhVunicwIRwAjeqLb93eU38JGJNfzJJa/exec';
+
+function saveAnketa(){
+  const status = document.getElementById('save-status');
+  if(!SHEET_WEBAPP_URL || SHEET_WEBAPP_URL.indexOf('ВСТАВЬТЕ')===0){
+    status.textContent = 'Не настроено сохранение (см. apps-script/README.md)';
+    status.style.color = '#E7A98F';
+    return;
+  }
+  const payload = {
+    timestamp: new Date().toISOString(),
+    name: S.name||'', date: S.date||'', expert: S.expert||'', reason: S.reason||'',
+    pointA: S.pointA||'', pointB: S.pointB||'',
+    income: S.income||'', expense: S.expense||'', freeRest: document.getElementById('free-rest').textContent,
+    cushion: S.cushion||'', loans: S.loans||'', hasInvest: S.hasInvest||'', storeWhere: S.storeWhere||'',
+    goal: S.goal||'', goalSum: S.goalSum||'', years: S.years||'', started: S.started||'',
+    start: S.start||'', monthly: S.monthly||'', rate: S.rate||'',
+    experience: (S.experience||[]).join(', '), expLevel: S.expLevel||'', improve: S.improve||'', interest: S.interest||'',
+    barrier: S.barrier||'', ifDelay: S.ifDelay||'',
+    route: S.route? S.route.name:'', routeCourse: S.route? S.route.course:'',
+    forecastFV: document.getElementById('r-fv').textContent,
+    forecastPct: document.getElementById('g-pct').textContent,
+    forecastNeed: document.getElementById('r-need').textContent,
+  };
+  status.textContent = 'Сохранение…'; status.style.color = '#C7D3C9';
+  fetch(SHEET_WEBAPP_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(payload)
+  }).then(()=>{
+    status.textContent = '✓ Анкета сохранена в таблицу';
+    status.style.color = '#BFE3CF';
+  }).catch(()=>{
+    status.textContent = 'Ошибка сохранения — проверьте подключение';
+    status.style.color = '#E7A98F';
+  });
+}
 </script>
 </body>
 </html>

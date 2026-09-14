@@ -124,6 +124,9 @@
 
   .auto{background:var(--sage); border:1px dashed var(--gold); color:var(--pine-2); padding:10px 12px;
     border-radius:10px; font-weight:600; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .strategy-output label{font-size:13px;font-weight:500}
+  .strategy-output output{flex-shrink:0}
+  @media(max-width:640px){.strategy-output .auto{align-items:flex-start;flex-direction:column}}
 
   /* ---------- Calculator ---------- */
   .calc{margin-top:6px; border:1px solid var(--gold); border-radius:var(--radius); overflow:hidden}
@@ -158,7 +161,6 @@
   .route h3{font-family:"Cormorant Garamond",serif; font-size:20px; color:var(--pine)}
   .route .course{font-size:12px; font-weight:700; color:var(--gold); letter-spacing:.3px}
   .route p{margin:0; font-size:12.5px; color:var(--muted); line-height:1.45}
-  .route .tag{font-size:11px; color:var(--pine-2); background:var(--sage); border-radius:6px; padding:3px 7px; align-self:flex-start}
   .route-link{margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
     background:var(--pine); color:#F1EEE2; text-decoration:none; padding:8px 14px; border-radius:999px;
     font-weight:600; font-size:12.5px; transition:.16s}
@@ -300,8 +302,8 @@
         <div class="field"><label>Уже начали копить?</label><div class="pillset" data-toggle="started"><button data-v="да">Да</button><button data-v="нет">Нет</button></div></div>
         <div class="field"><label>Сумма на старте, ₽ <span class="hint">уже накоплено / для старта</span></label><input type="number" data-f="start" placeholder="5000"></div>
         <div class="field"><label>Готовы откладывать, ₽/мес</label><input type="number" data-f="monthly" placeholder="1000"></div>
-        <div class="field span2"><label for="goal-progress">При текущей ситуации цель достигается на</label><div class="auto"><output id="goal-progress" aria-live="polite">—</output></div></div>
-        <div class="field span2"><label for="goal-future">Накопится сумма при текущей стратегии</label><div class="auto"><output id="goal-future" aria-live="polite">— ₽</output></div></div>
+        <div class="field span2 strategy-output"><div class="auto"><label for="goal-progress">При текущей ситуации цель достигается на</label><output id="goal-progress" aria-live="polite">—</output></div></div>
+        <div class="field span2 strategy-output"><div class="auto"><label for="goal-future">Накопится сумма при текущей стратегии</label><output id="goal-future" aria-live="polite">— ₽</output></div></div>
       </div>
 
       <!-- CALCULATOR -->
@@ -366,6 +368,11 @@
     <!-- SECTION 6 -->
     <section class="card" id="s6">
       <div class="sec-head"><span class="idx serif">6</span><div><h2>Резюме встречи</h2></div></div>
+      <div class="grid one" style="margin-bottom:22px">
+        <div class="field"><label for="summary-a">Где я сейчас финансово (точка А)</label><textarea id="summary-a" data-f="summaryA" rows="3"></textarea></div>
+        <div class="field"><label for="summary-b">Где я хочу быть (желаемая точка Б)</label><textarea id="summary-b" data-f="summaryB" rows="3"></textarea></div>
+        <div class="field"><label for="recommended-format">Рекомендуемый формат</label><textarea id="recommended-format" data-f="recommendedFormat" rows="3"></textarea></div>
+      </div>
       <div class="routes" id="routes"></div>
     </section>
 
@@ -375,7 +382,7 @@
       <div class="sum-grid">
         <div class="sum-card"><div class="lbl">Точка А — где сейчас</div><div class="txt empty" id="sum-a">—</div></div>
         <div class="sum-card"><div class="lbl">Точка Б — цель</div><div class="txt empty" id="sum-b">—</div></div>
-        <div class="sum-card" style="border-color:var(--gold)"><div class="lbl">Рекомендуемый маршрут</div><div class="txt empty" id="sum-route">—</div></div>
+        <div class="sum-card" style="border-color:var(--gold)"><div class="lbl">Рекомендуемый формат</div><div class="txt empty" id="sum-route">—</div></div>
       </div>
       <div class="print-only" style="margin-top:16px; font-family:'Cormorant Garamond',serif; font-size:16px; color:#E9E5D6">
         Накопится при текущей стратегии: <span id="print-fv">—</span> · это <span id="print-pct">—</span> цели. Рекомендуем откладывать <span id="print-need">—</span>/мес.
@@ -476,16 +483,17 @@ document.querySelectorAll('[data-exp]').forEach(cb=>{
 
 /* ---------------- routes ---------------- */
 const ROUTES = [
-  {id:'base', name:'Финансовая основа', course:'Личный капитал', when:'нет системы и понимания денег', desc:'Порядок в финансах, цели, план создания капитала', tag:'старт', url:'https://kapital.monterium-edu.ru/kurs'},
-  {id:'realty', name:'Недвижимость', course:'Доходный метр', when:'интерес к объектам и доходу', desc:'Система инвестирования в недвижимость', tag:'актив', url:'https://kvartirnyy-vopros.monterium-edu.ru/dokhodnyy_metr'},
-  {id:'stock', name:'Фондовый рынок', course:'Портфель на фондовом рынке', when:'акции, облигации, фонды', desc:'Навык создания инвестиционного портфеля', tag:'портфель', url:'https://fondovyi.monterium-edu.ru/kurs/'},
-  {id:'trade', name:'Торги', course:'Торги. Инвестиционный подход', when:'активы ниже рынка', desc:'Инвестиционный подход к торгам', tag:'ниже рынка', url:'https://torgi.monterium-edu.ru/'},
-  {id:'crypto', name:'Криптовалюта', course:'Система', when:'цифровые активы', desc:'Понимание рынка и управление рисками', tag:'цифра', url:'https://monterium-edu.ru/system'},
+  {id:'base', name:'Финансовая основа', course:'Личный капитал', desc:'Порядок в финансах, цели, план создания капитала', url:'https://kapital.monterium-edu.ru/kurs'},
+  {id:'realty', name:'Недвижимость', course:'Доходный метр', desc:'Система инвестирования в недвижимость', url:'https://kvartirnyy-vopros.monterium-edu.ru/dokhodnyy_metr'},
+  {id:'stock', name:'Фондовый рынок', course:'Портфель на фондовом рынке', desc:'Навык создания инвестиционного портфеля', url:'https://fondovyi.monterium-edu.ru/kurs/'},
+  {id:'trade', name:'Торги', course:'Торги. Инвестиционный подход', desc:'Инвестиционный подход к торгам', url:'https://torgi.monterium-edu.ru/'},
+  {id:'crypto', name:'Криптовалюта', course:'Система', desc:'Понимание рынка и управление рисками', url:'https://monterium-edu.ru/system'},
+  {id:'capital', name:'Капитал нового уровня', course:'Капитал нового уровня', url:'https://kapnovuroveni.monterium-edu.ru/'},
 ];
 const routesEl = document.getElementById('routes');
 ROUTES.forEach(r=>{
   const d=document.createElement('div'); d.className='route'; d.dataset.id=r.id;
-  d.innerHTML=`<div class="check">✓</div><span class="course">Курс «${r.course}»</span><h3 class="serif">${r.name}</h3><p>${r.desc}</p><span class="tag">Когда: ${r.when}</span><a class="route-link" href="${r.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Открыть курс →</a>`;
+  d.innerHTML=`<div class="check">✓</div>${r.course!==r.name?`<span class="course">Курс «${r.course}»</span>`:''}<h3 class="serif">${r.name}</h3>${r.desc?`<p>${r.desc}</p>`:''}<a class="route-link" href="${r.url}" target="_blank" rel="noopener" aria-label="Ссылка на ${r.course}" onclick="event.stopPropagation()">Ссылка</a>`;
   d.onclick=()=>{ document.querySelectorAll('.route').forEach(x=>x.classList.remove('on')); d.classList.add('on'); S.route=r; recompute(); };
   routesEl.appendChild(d);
 });
@@ -499,7 +507,8 @@ function recompute(){
   document.getElementById('m-expert').textContent = S.expert||'—';
 
   // summary A/B
-  setText('sum-a', S.pointA); setText('sum-b', S.pointB);
+  setText('sum-a', S.summaryA); setText('sum-b', S.summaryB);
+  setText('sum-route', S.recommendedFormat);
 
   // free rest
   const inc=+S.income||0, exp=+S.expense||0;
@@ -545,12 +554,6 @@ function recompute(){
     nd.textContent='Заполните поля выше — покажем, достигается ли цель при текущей стратегии.';
   }
 
-  // route mirrors
-  if(S.route){
-    setText('sum-route', S.route.name+' · курс «'+S.route.course+'»');
-  } else {
-    setText('sum-route', '');
-  }
 }
 function setText(id,val){
   const el=document.getElementById(id); if(!el) return;
@@ -604,7 +607,10 @@ function fillDemo(){
     storeWhere:'На вкладе',goal:'На обучение ребёнка через 4 года',goalSum:3000000,years:3,
     start:5000,monthly:1000,expLevel:'Почти ничего не знаю, результата нет',
     improve:'Повысить доходность',interest:'Облигации, фондовый рынок',
-    barrier:'Не хватает свободных денег и системы',ifDelay:'Цель отодвинется ещё на годы'};
+    barrier:'Не хватает свободных денег и системы',ifDelay:'Цель отодвинется ещё на годы',
+    summaryA:'Расходы превышают доходы. Нужен план управления бюджетом и накоплениями.',
+    summaryB:'Сформировать капитал для обучения ребёнка и финансовую подушку.',
+    recommendedFormat:'Обучение с практическими заданиями и сопровождением эксперта.'};
   Object.entries(data).forEach(([k,v])=>{
     const el=document.querySelector(`[data-f="${k}"]`); if(el){ el.value=v; S[k]=v; }
   });
@@ -665,6 +671,7 @@ function saveAnketa(){
     forecastFV: document.getElementById('r-fv').textContent,
     forecastPct: document.getElementById('g-pct').textContent,
     forecastNeed: document.getElementById('r-need').textContent,
+    summaryA: S.summaryA||'', summaryB: S.summaryB||'', recommendedFormat: S.recommendedFormat||'',
   };
   setStatus('Сохранение…', '#C7D3C9');
   fetch(SHEET_WEBAPP_URL, {

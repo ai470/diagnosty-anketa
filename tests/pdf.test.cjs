@@ -64,7 +64,7 @@ test('demo: every answer, original visual components, links, embedded Cyrillic a
   }));
   const result = await exportPDF(page, 'demo', true);
   assert.ok(result.text.includes('Диагностическая карта финансового пути') && result.text.includes('Монтериум'));
-  for (const removed of ['Капитал нового уровня', 'Финансовый путь клиента', 'Кто перед нами', 'Показываем клиенту', 'Заполняйте карту вместе']) {
+  for (const removed of ['Финансовый путь клиента', 'Кто перед нами', 'Показываем клиенту', 'Заполняйте карту вместе', 'Когда:', 'Открыть курс']) {
     assert.ok(!result.text.includes(removed), `Client PDF contains removed staff copy: ${removed}`);
   }
   for (const answer of snapshot.values) assert.ok(result.text.includes(normal(answer)), `Missing answer: ${answer}`);
@@ -94,7 +94,8 @@ test('mobile viewport produces the same printed layout and content', async () =>
 test('spreadsheet example matches automatic rows, strategy and PDF; clearing removes stale results', async () => {
   const page = await questionnaire();
   await page.evaluate(() => {
-    const values = {goalSum: '6000000', years: '5', start: '1000000', monthly: '5000'};
+    fillDemo();
+    const values = {date: '2026-09-14', goal: 'На обучение ребёнка через 5 лет', goalSum: '6000000', years: '5', start: '1000000', monthly: '5000'};
     for (const [key,value] of Object.entries(values)) document.querySelector(`[data-f="${key}"]`).value = value;
     syncAnketaForPrint();
   });
@@ -105,6 +106,17 @@ test('spreadsheet example matches automatic rows, strategy and PDF; clearing rem
   assert.ok(filled.text.includes('4 386 162,50 ₽') && filled.text.includes('73,10%'));
   assert.ok(filled.text.includes('При текущей ситуации цель достигается на'));
   assert.ok(filled.text.includes('Накопится сумма при текущей стратегии'));
+  assert.ok(filled.pages.some(p => p.text.includes('Цели и мотивация') && p.text.includes('Проверка стратегии') && p.text.includes('Нужно откладывать')), 'Goal fields and chart fit together on one A4 page');
+  // Capture the existing save request locally; never submit a test client to Sheets.
+  const payload = await page.evaluate(() => {
+    let saved;
+    window.fetch = async (_url, options) => { saved = JSON.parse(options.body); return {}; };
+    saveAnketa();
+    return saved;
+  });
+  assert.equal(payload.rate, 30);
+  assert.equal(normal(payload.forecastFV), '4 386 162,50 ₽');
+  assert.equal(payload.forecastPct, '73,10%');
   await page.locator('[data-f="monthly"]').fill('0');
   assert.equal(normal(await page.locator('#r-fv').textContent()), '3 712 930,00 ₽');
   await page.locator('[data-f="years"]').fill('');
@@ -139,6 +151,7 @@ test('long multiline answers and unbroken strings survive page boundaries', asyn
   await page.evaluate(({long, token}) => {
     fillDemo();
     document.querySelector('[data-f="pointA"]').value = long;
+    document.querySelector('[data-f="summaryA"]').value = long;
     document.querySelector('[data-f="expLevel"]').value = long;
     document.querySelector('[data-f="barrier"]').value = long;
     document.querySelector('[data-f="reason"]').value = token;
@@ -147,10 +160,10 @@ test('long multiline answers and unbroken strings survive page boundaries', asyn
   const result = await exportPDF(page, 'long', true);
   assert.ok(result.text.includes('Последняя строка ответа'));
   assert.ok(result.text.includes('<b>Буквальный ответ & символы</b>'));
-  // pointA appears in its field and summary; expLevel and barrier once each.
+  // Initial answer, experience and barrier once; the expert's summary twice.
   for (let i = 1; i <= 90; i++) {
     const marker = `Строка ${String(i).padStart(3, '0')}:`;
-    assert.equal(result.text.split(marker).length - 1, 4, `Lost or duplicated line ${i}`);
+    assert.equal(result.text.split(marker).length - 1, 5, `Lost or duplicated line ${i}`);
   }
   assert.ok(result.text.replace(/\s/g, '').includes(token), 'Unbroken input is wrapped without truncation');
   console.log(`Long answers: ${result.pages.length} pages`);
@@ -161,7 +174,7 @@ test('zeroes, unchecked choices, and cleared values do not leak old answers or r
   const page = await questionnaire();
   await page.evaluate(() => {
     fillDemo();
-    ['pointA', 'pointB', 'years', 'goalSum'].forEach(key => document.querySelector(`[data-f="${key}"]`).value = '');
+    ['pointA', 'pointB', 'summaryA', 'summaryB', 'recommendedFormat', 'years', 'goalSum'].forEach(key => document.querySelector(`[data-f="${key}"]`).value = '');
     document.querySelector('[data-f="income"]').value = '0';
     document.querySelector('[data-f="expense"]').value = '0';
     document.querySelector('[data-f="monthly"]').value = '0.125';
@@ -208,9 +221,10 @@ test('both buttons invoke the print flow; cancellation, duplicate clicks, failur
   await page.close();
 });
 
-test('all five route selections and native Ctrl+P keep actual values', async () => {
+test('all six route selections and native Ctrl+P keep actual values', async () => {
   const page = await questionnaire();
   const ids = await page.locator('.route').evaluateAll(nodes => nodes.map(node => node.dataset.id));
+  assert.equal(ids.length, 6);
   for (const id of ids) {
     await page.locator(`.route[data-id="${id}"]`).click();
     const selected = await page.evaluate(async () => {
@@ -228,5 +242,34 @@ test('all five route selections and native Ctrl+P keep actual values', async () 
   await page.locator('[data-f="name"]').fill('Ольга & <Иванова>');
   await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
   assert.equal(await page.locator('[data-print-field="name"]').textContent(), 'Ольга & <Иванова>');
+  await page.close();
+});
+
+test('expert summary is independent, precedes products, and is exported and saved intact', async () => {
+  const page = await questionnaire();
+  await page.evaluate(() => fillDemo());
+  const values = {summaryA: 'Итог эксперта: текущий бюджет\nУточнение по итогам встречи', summaryB: 'Итоговая цель клиента', recommendedFormat: 'Индивидуальные занятия с экспертом'};
+  for (const [key,value] of Object.entries(values)) await page.locator(`[data-f="${key}"]`).fill(value);
+  await page.locator('[data-f="pointA"]').fill('Первоначальный ответ клиента');
+  await page.locator('.route[data-id="capital"]').click();
+  assert.equal(await page.locator('#sum-a').textContent(), values.summaryA);
+  assert.equal(await page.locator('#sum-b').textContent(), values.summaryB);
+  assert.equal(await page.locator('#sum-route').textContent(), values.recommendedFormat);
+  assert.equal(await page.locator('.route .tag').count(), 0);
+  assert.deepEqual(await page.locator('.route-link').allTextContents(), Array(6).fill('Ссылка'));
+  assert.ok(await page.evaluate(() => !!(document.querySelector('#recommended-format').compareDocumentPosition(document.querySelector('#routes')) & Node.DOCUMENT_POSITION_FOLLOWING)));
+  const payload = await page.evaluate(() => {
+    let saved;
+    window.fetch = async (_url, options) => { saved = JSON.parse(options.body); return {}; };
+    saveAnketa(); return saved;
+  });
+  for (const [key,value] of Object.entries(values)) assert.equal(payload[key], value);
+  assert.equal(payload.routeCourse, 'Капитал нового уровня');
+  const pdf = await exportPDF(page, 'meeting-summary');
+  for (const value of Object.values(values)) assert.ok(pdf.text.includes(normal(value)));
+  assert.ok(pdf.text.indexOf('Рекомендуемый формат') < pdf.text.indexOf('Курс «Личный капитал»'));
+  assert.ok(pdf.pages.flatMap(p=>p.links).includes('https://kapnovuroveni.monterium-edu.ru/'));
+  await page.locator('[data-f="summaryA"]').fill('');
+  assert.equal(await page.locator('#sum-a').textContent(), '—');
   await page.close();
 });

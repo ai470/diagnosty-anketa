@@ -13,7 +13,8 @@ var HEADERS = [
   'experience', 'expLevel', 'improve', 'interest',
   'barrier', 'ifDelay',
   'route', 'routeCourse',
-  'forecastFV', 'forecastPct', 'forecastNeed'
+  'forecastFV', 'forecastPct', 'forecastNeed',
+  'summaryA', 'summaryB', 'recommendedFormat'
 ];
 
 function doPost(e) {
@@ -24,9 +25,16 @@ function doPost(e) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
   }
+  // Append new columns without shifting existing answers or overwriting headers.
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var missing = HEADERS.filter(function (key) { return headers.indexOf(key) === -1; });
+  if (missing.length) {
+    sheet.getRange(1, headers.length + 1, 1, missing.length).setValues([missing]);
+    headers = headers.concat(missing);
+  }
 
   var data = JSON.parse(e.postData.contents);
-  var row = HEADERS.map(function (key) {
+  var row = headers.map(function (key) {
     return data[key] !== undefined ? data[key] : '';
   });
   sheet.appendRow(row);

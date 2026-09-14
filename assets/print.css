@@ -55,7 +55,14 @@
   .tile,.route,.calc,.summary,.site-footer{break-inside:avoid}
   .tile{padding:11px 10px}
   .calc{overflow:visible}
+  .calc-head{border-radius:calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0}
   .calc-inputs,.result,.res-row,.sum-card{min-width:0}
+  /* Keep the goal fields, two automatic rows and chart together on A4. */
+  #s3 .grid{row-gap:12px}
+  #s3 .print-value{padding-top:8px;padding-bottom:8px;min-height:40px}
+  #s3 .calc-body{padding:16px}
+  #s3 .result{padding:14px}
+  .strategy-output .auto{flex-direction:row;align-items:center;white-space:normal}
   .res-row .v{flex-shrink:0;max-width:60%;overflow-wrap:anywhere}
   .sum-card .txt,.route,.auto{overflow-wrap:anywhere;white-space:pre-wrap}
   .route:hover{transform:none}

@@ -6,7 +6,7 @@
 <title>Карта-диагностика финансового пути</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
     --pine:#10382C; --pine-2:#1C4A3A; --pine-3:#0B2A20;
@@ -258,9 +258,15 @@
   .force-print .pt .lbl{color:#8a6d24}
   .force-print .pt .val{color:var(--ink)}
   .force-print .wrap{display:block; max-width:none; padding:0}
-  .force-print section.card{box-shadow:none; border-color:#ccc; margin-bottom:12px}
-  .force-print .site-footer{margin-top:14px}
+  .force-print section.card{box-shadow:none; border-color:#ccc; margin-bottom:12px; break-inside:avoid; page-break-inside:avoid}
+  .force-print .summary{break-inside:avoid; page-break-inside:avoid}
+  .force-print .site-footer{margin-top:14px; break-inside:avoid; page-break-inside:avoid}
   .force-print .print-only{display:block}
+  .force-print textarea{height:auto !important; overflow:visible !important; white-space:pre-wrap}
+  .force-print [data-f]{display:none !important}
+  .pdf-value{display:none}
+  .force-print .pdf-value{display:block; white-space:pre-wrap; padding:9px 11px; border:1px solid var(--line);
+    border-radius:10px; background:#FBFBF6; min-height:1.3em; font-size:14px; color:var(--ink)}
 </style>
 </head>
 <body>
@@ -697,24 +703,49 @@ function setPill(name,val){
 recompute();
 
 /* ---------------- PDF export ---------------- */
+function preparePrintClone(doc){
+  doc.documentElement.classList.add('force-print');
+  // input/textarea values live in the .value property, not as DOM text —
+  // html2canvas can only paint real DOM text, so swap fields for plain text blocks
+  doc.querySelectorAll('[data-f]').forEach(el=>{
+    if(el.tagName!=='INPUT' && el.tagName!=='TEXTAREA') return;
+    let val = el.value || '';
+    if(el.type==='date' && val){
+      const d = new Date(val);
+      if(!isNaN(d)) val = d.toLocaleDateString('ru-RU');
+    }
+    const div = doc.createElement('div');
+    div.className = 'pdf-value';
+    div.textContent = val && String(val).trim() ? val : '—';
+    el.parentNode.insertBefore(div, el.nextSibling);
+  });
+}
+
 function downloadPDF(){
   const btns = document.querySelectorAll('#pdf-btn, [onclick="downloadPDF()"]');
   btns.forEach(b=>{ b.dataset.origText=b.textContent; b.textContent='Формируем PDF…'; b.disabled=true; });
+  const restore = ()=> btns.forEach(b=>{ b.textContent=b.dataset.origText; b.disabled=false; });
 
   const filename = 'Анкета_' + (S.name ? S.name.replace(/\s+/g,'_') : 'клиент') + '.pdf';
   const opt = {
     margin: 8,
     filename,
     image: { type:'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 900,
-      onclone: (doc)=>{ doc.documentElement.classList.add('force-print'); } },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1000,
+      logging: true, onclone: preparePrintClone },
     jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-    pagebreak: { mode:['css','legacy'] }
+    pagebreak: { mode:['css'] }
   };
 
-  html2pdf().set(opt).from(document.body).save().finally(()=>{
-    btns.forEach(b=>{ b.textContent=b.dataset.origText; b.disabled=false; });
-  });
+  // wait for web fonts so text doesn't render blank/fallback mid-capture
+  const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  ready.then(()=> html2pdf().set(opt).from(document.body).save())
+    .catch(err=>{
+      console.error('PDF export failed, falling back to browser print:', err);
+      alert('Не удалось автоматически собрать PDF. Открываю окно печати — выберите «Сохранить как PDF».');
+      window.print();
+    })
+    .finally(restore);
 }
 
 /* ---------------- save to Google Sheet ---------------- */

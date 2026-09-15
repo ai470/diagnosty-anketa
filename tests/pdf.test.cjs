@@ -267,7 +267,7 @@ test('expert summary is independent, precedes products, and is exported and save
   assert.equal(payload.routeCourse, 'Капитал нового уровня');
   const pdf = await exportPDF(page, 'meeting-summary');
   for (const value of Object.values(values)) assert.ok(pdf.text.includes(normal(value)));
-  assert.ok(pdf.text.indexOf('Рекомендуемый формат') < pdf.text.indexOf('Курс «Личный капитал»'));
+  assert.ok(pdf.text.indexOf('Рекомендуемый формат') < pdf.text.indexOf('«Личный капитал»'));
   assert.ok(pdf.pages.flatMap(p=>p.links).includes('https://kapnovuroveni.monterium-edu.ru/'));
   await page.locator('[data-f="summaryA"]').fill('');
   assert.equal(await page.locator('#sum-a').textContent(), '—');

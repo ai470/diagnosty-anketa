@@ -176,7 +176,7 @@
   @media(max-width:760px){ .sum-grid{grid-template-columns:1fr} }
   .sum-card{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.25); border-radius:11px; padding:16px}
   .sum-card .lbl{font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-2); font-weight:600; margin-bottom:6px}
-  .sum-card .txt{font-family:"Cormorant Garamond",serif; font-size:19px; line-height:1.2; color:#F6F3E9; min-height:1.2em}
+  .sum-card .txt{font-family:"Cormorant Garamond",serif; font-size:19px; line-height:1.2; color:#F6F3E9; min-height:1.2em; white-space:pre-wrap}
   .sum-card .txt.empty{color:#8AA093; font-style:italic; font-size:15px}
 
   /* ---------- Bitrix modal ---------- */
@@ -348,6 +348,7 @@
         <label class="tile"><input type="checkbox" data-exp="Другое"><span>Другое</span></label>
       </div>
       <div class="grid one" style="margin-top:18px">
+        <div class="field"><label>Уточните, что именно «Другое»</label><input type="text" data-f="expOther" placeholder="Например, ИИС, ПИФы, драгметаллы"></div>
         <div class="field"><label>Как оцениваете свой опыт? Какой есть результат?</label><textarea data-f="expLevel" placeholder="Словами клиента"></textarea></div>
         <div class="grid" style="gap:16px 22px">
           <div class="field"><label>Что хотели бы улучшить?</label><input type="text" data-f="improve" placeholder="Например, повысить доходность"></div>
@@ -485,10 +486,10 @@ document.querySelectorAll('[data-exp]').forEach(cb=>{
 const ROUTES = [
   {id:'base', name:'Финансовая основа', course:'Личный капитал', desc:'Порядок в финансах, цели, план создания капитала', url:'https://kapital.monterium-edu.ru/kurs'},
   {id:'realty', name:'Недвижимость', course:'Доходный метр', desc:'Система инвестирования в недвижимость', url:'https://kvartirnyy-vopros.monterium-edu.ru/dokhodnyy_metr'},
-  {id:'stock', name:'Фондовый рынок', course:'Портфель на фондовом рынке', desc:'Навык создания инвестиционного портфеля', url:'https://fondovyi.monterium-edu.ru/kurs/'},
-  {id:'trade', name:'Торги', course:'Торги. Инвестиционный подход', desc:'Инвестиционный подход к торгам', url:'https://torgi.monterium-edu.ru/'},
-  {id:'crypto', name:'Криптовалюта', course:'Система', desc:'Понимание рынка и управление рисками', url:'https://monterium-edu.ru/system'},
-  {id:'capital', name:'Капитал нового уровня', course:'Капитал нового уровня', url:'https://kapnovuroveni.monterium-edu.ru/'},
+  {id:'stock', name:'Фондовый рынок', course:'Портфель на фондовом рынке', desc:'Формирование портфеля из российских и зарубежных активов фондового рынка', url:'https://fondovyi.monterium-edu.ru/kurs/'},
+  {id:'trade', name:'Торги', course:'Торги. Инвестиционный подход', desc:'Инвестиционный подход к торгам по банкротству', url:'https://torgi.monterium-edu.ru/'},
+  {id:'crypto', name:'Криптовалюта', course:'Система', desc:'Эффективные стратегии управления цифровыми активами', url:'https://monterium-edu.ru/system'},
+  {id:'capital', name:'Капитал нового уровня', course:'Капитал нового уровня', desc:'Создание комплексной эффективной инвестиционной системы через работу с мышлением', url:'https://kapnovuroveni.monterium-edu.ru/'},
 ];
 const routesEl = document.getElementById('routes');
 ROUTES.forEach(r=>{
@@ -665,7 +666,7 @@ function saveAnketa(){
     cushion: S.cushion||'', loans: S.loans||'', hasInvest: S.hasInvest||'', storeWhere: S.storeWhere||'',
     goal: S.goal||'', goalSum: S.goalSum||'', years: S.years||'', started: S.started||'',
     start: S.start||'', monthly: S.monthly||'', rate: AnketaStrategy.annualRate*100,
-    experience: (S.experience||[]).join(', '), expLevel: S.expLevel||'', improve: S.improve||'', interest: S.interest||'',
+    experience: (S.experience||[]).join(', '), expOther: S.expOther||'', expLevel: S.expLevel||'', improve: S.improve||'', interest: S.interest||'',
     barrier: S.barrier||'', ifDelay: S.ifDelay||'',
     route: S.route? S.route.name:'', routeCourse: S.route? S.route.course:'',
     forecastFV: document.getElementById('r-fv').textContent,

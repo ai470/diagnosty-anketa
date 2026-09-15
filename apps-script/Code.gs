@@ -10,7 +10,7 @@ var HEADERS = [
   'income', 'expense', 'freeRest',
   'cushion', 'loans', 'hasInvest', 'storeWhere',
   'goal', 'goalSum', 'years', 'started', 'start', 'monthly', 'rate',
-  'experience', 'expLevel', 'improve', 'interest',
+  'experience', 'expOther', 'expLevel', 'improve', 'interest',
   'barrier', 'ifDelay',
   'route', 'routeCourse',
   'forecastFV', 'forecastPct', 'forecastNeed',

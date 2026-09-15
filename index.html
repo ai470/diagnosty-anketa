@@ -170,6 +170,7 @@
   .route.on{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold), var(--shadow); background:#FFFDF7}
   .route h3{font-family:"Cormorant Garamond",serif; font-size:20px; color:var(--pine)}
   .route .course{font-size:12px; font-weight:700; color:var(--gold); letter-spacing:.3px}
+  .route h3.course{font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.3px}
   .route p{margin:0; font-size:12.5px; color:var(--muted); line-height:1.45}
   .route-link{margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
     background:var(--pine); color:#F1EEE2; text-decoration:none; padding:8px 14px; border-radius:999px;
@@ -504,7 +505,7 @@ const ROUTES = [
 const routesEl = document.getElementById('routes');
 ROUTES.forEach(r=>{
   const d=document.createElement('div'); d.className='route'; d.dataset.id=r.id;
-  d.innerHTML=`<div class="check">✓</div>${r.course!==r.name?`<span class="course">«${r.course}»</span>`:''}<h3 class="serif">${r.course===r.name?`«${r.name}»`:r.name}</h3>${r.desc?`<p>${r.desc}</p>`:''}<a class="route-link" href="${r.url}" target="_blank" rel="noopener" aria-label="Ссылка на ${r.course}" onclick="event.stopPropagation()">Ссылка</a>`;
+  d.innerHTML=`<div class="check">✓</div>${r.course!==r.name?`<span class="course">«${r.course}»</span>`:''}<h3 class="${r.course===r.name?'course':'serif'}">${r.course===r.name?`«${r.name}»`:r.name}</h3>${r.desc?`<p>${r.desc}</p>`:''}<a class="route-link" href="${r.url}" target="_blank" rel="noopener" aria-label="Ссылка на ${r.course}" onclick="event.stopPropagation()">Ссылка</a>`;
   d.onclick=()=>{ document.querySelectorAll('.route').forEach(x=>x.classList.remove('on')); d.classList.add('on'); S.route=r; recompute(); };
   routesEl.appendChild(d);
 });

@@ -99,8 +99,8 @@
   .field > label{font-size:13px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:7px}
   .field .hint{font-weight:400; color:var(--muted); font-size:11.5px}
   input[type=text],input[type=number],input[type=date],select,textarea{
-    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
-    transition:border-color .15s, box-shadow .15s; outline:none;
+    width:100%; min-width:0; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
+    transition:border-color .15s, box-shadow .15s; outline:none; overflow-wrap:anywhere;
   }
   textarea{resize:vertical; min-height:56px; line-height:1.45}
   input:focus,select:focus,textarea:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(196,160,82,.16)}
@@ -174,9 +174,9 @@
   .summary h2{font-family:"Cormorant Garamond",serif; font-size:26px; color:#F6F3E9; margin-bottom:18px}
   .sum-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
   @media(max-width:760px){ .sum-grid{grid-template-columns:1fr} }
-  .sum-card{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.25); border-radius:11px; padding:16px}
+  .sum-card{background:rgba(255,255,255,.06); border:1px solid rgba(212,185,104,.25); border-radius:11px; padding:16px; min-width:0}
   .sum-card .lbl{font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-2); font-weight:600; margin-bottom:6px}
-  .sum-card .txt{font-family:"Cormorant Garamond",serif; font-size:19px; line-height:1.2; color:#F6F3E9; min-height:1.2em; white-space:pre-wrap}
+  .sum-card .txt{font-family:"Cormorant Garamond",serif; font-size:19px; line-height:1.2; color:#F6F3E9; min-height:1.2em; white-space:pre-wrap; overflow-wrap:anywhere}
   .sum-card .txt.empty{color:#8AA093; font-style:italic; font-size:15px}
 
   /* ---------- Bitrix modal ---------- */
